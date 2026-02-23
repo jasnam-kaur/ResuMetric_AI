@@ -1,6 +1,11 @@
 from django.shortcuts import render, redirect
 from .forms import ResumeUploadForm
 from .utils import extract_text_from_pdf, clean_resume_text, calculate_match_score
+import pymupdf  # Use this instead of 'import fitz'
+
+def some_function():
+    # Update your code to use the new name
+    doc = pymupdf.open("resume.pdf")
 
 def upload_resume(request):
     if request.method == 'POST':
