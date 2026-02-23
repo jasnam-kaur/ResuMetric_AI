@@ -3,9 +3,7 @@ from .forms import ResumeUploadForm
 from .utils import extract_text_from_pdf, clean_resume_text, calculate_match_score
 import pymupdf
 
-def some_function():
-    # Update your code to use the new name
-    doc = pymupdf.open("resume.pdf")
+doc = pymupdf.open("resume.pdf")
 
 def upload_resume(request):
     if request.method == 'POST':
