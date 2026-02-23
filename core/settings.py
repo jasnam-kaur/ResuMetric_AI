@@ -25,8 +25,7 @@ SECRET_KEY = 'django-insecure-6&47i_0g2un_kdetrj0p*xf#2)sho^okvgv$&iy%*4p6y2j3%1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['resumetric-ai.onrender.com', 'localhost', '127.0.0.1']
 
 # Application definition
 
