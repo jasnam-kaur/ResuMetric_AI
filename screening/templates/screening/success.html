@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analysis Result</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card shadow border-0 p-4 text-center">
+            <h1 class="display-4 fw-bold text-primary">Analysis Complete!</h1>
+            <hr>
+            <div class="my-4">
+                <h3 class="text-muted">Match Score</h3>
+                <div class="display-1 fw-bold text-success">{{ resume.score }}%</div>
+            </div>
+            
+            <p class="lead">Candidate: <strong>{{ resume.name|default:"New Applicant" }}</strong></p>
+            <a href="/" class="btn btn-outline-secondary">Upload Another Resume</a>
+        </div>
+    </div>
+</body>
+</html>
