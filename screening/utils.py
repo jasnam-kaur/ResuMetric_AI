@@ -1,4 +1,4 @@
-import pymupdf
+import fitz
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -7,7 +7,7 @@ def extract_text_from_pdf(pdf_path):
     text = ""
     try:
         # Use pymupdf.open instead of fitz.open
-        with pymupdf.open(pdf_path) as doc:
+        with fitz.open(pdf_path) as doc:
             for page in doc:
                 text += page.get_text()
     except Exception as e:
