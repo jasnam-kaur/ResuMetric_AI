@@ -1,36 +1,41 @@
 import fitz
 import re
+import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-def extract_text_from_pdf(pdf_path):
-    text = ""
-    try:
-        with fitz.open(pdf_path) as doc:
-            for page in doc:
-                text += page.get_text()
-        print(f"DEBUG PDF TEXT: {text[:100]}")
-    except Exception as e:
-        print(f"Error reading PDF: {e}")
-    return text
+# Load the spaCy model you installed on Render
+nlp = spacy.load("en_core_web_sm")
 
 def clean_resume_text(text):
+    # 1. Basic Cleaning
     text = text.lower()
-    text = re.sub(r'\s+', ' ', text) # Remove extra whitespace
-    text = re.sub(r'[^a-z0-9\s]', '', text) # Remove special chars
-    return text.strip()
+    text = re.sub(r'\s+', ' ', text)
+    
+    # 2. NLP Lemmatization: Convert words to their base form
+    doc = nlp(text)
+    # This keeps only alphabetic words and removes "stop words" (is, the, etc.)
+    lemmatized_text = " ".join([token.lemma_ for token in doc if not token.is_stop and token.is_alpha])
+    
+    return lemmatized_text.strip()
 
 def calculate_match_score(resume_text, jd_text):
     if not resume_text or not jd_text:
         return 0.0
     
-    # We add a small 'buffer' of common words if strings are too short
-    content = [resume_text, jd_text]
+    # Clean both texts using the new Lemmatization logic
+    clean_resume = clean_resume_text(resume_text)
+    clean_jd = clean_resume_text(jd_text)
     
-    vectorizer = TfidfVectorizer(stop_words='english') # Ignore words like 'the', 'is'
+    content = [clean_resume, clean_jd]
+    
+    # We use ngram_range=(1,2) so it recognizes "Machine Learning" as one concept
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2))
+    
     try:
         tfidf_matrix = vectorizer.fit_transform(content)
         similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
         return round(float(similarity[0][0]) * 100, 2)
-    except:
+    except Exception as e:
+        print(f"ML Error: {e}")
         return 0.0
