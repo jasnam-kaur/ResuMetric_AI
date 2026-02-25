@@ -6,10 +6,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 def extract_text_from_pdf(pdf_path):
     text = ""
     try:
-        # Use pymupdf.open instead of fitz.open
         with fitz.open(pdf_path) as doc:
             for page in doc:
                 text += page.get_text()
+        print(f"DEBUG PDF TEXT: {text[:100]}")
     except Exception as e:
         print(f"Error reading PDF: {e}")
     return text
