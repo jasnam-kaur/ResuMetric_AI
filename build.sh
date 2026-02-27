@@ -2,14 +2,17 @@
 # exit on error
 set -o errexit
 
-# Install dependencies
+# Install python dependencies
 pip install -r requirements.txt
 
-# Download NLTK data (required by your utils.py)
+# Download the correct spaCy model dynamically
+python -m spacy download en_core_web_sm
+
+# Download NLTK data required for your utils.py logic
 python -c "import nltk; nltk.download('punkt'); nltk.download('wordnet'); nltk.download('omw-1.4')"
 
-# Convert static files
+# Collect static files for Whitenoise
 python manage.py collectstatic --no-input
 
-# Run database migrations
+# Run migrations
 python manage.py migrate
