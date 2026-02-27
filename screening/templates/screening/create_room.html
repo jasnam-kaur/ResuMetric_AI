@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0 p-4">
+                <h2 class="fw-bold mb-4">Create Hiring Room</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Job Title / Room Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Senior Java Developer"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Job Description</label>
+                        <textarea name="jd_text" class="form-control" rows="10" placeholder="Paste the JD here..."
+                            required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Room Expiry (Optional Timer)</label>
+                        <input type="datetime-local" name="expires_at" class="form-control">
+                        <small class="text-muted">Candidates won't be able to apply after this time.</small>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg">Create Room</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

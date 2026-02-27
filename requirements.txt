@@ -7,3 +7,11 @@ scikit-learn==1.4.1.post1
 pandas==2.2.0
 dj-database-url==2.1.0
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0-py3-none-any.whl
+django
+gunicorn
+PyMuPDF
+spacy
+scikit-learn
+openpyxl
+nltk
+https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl

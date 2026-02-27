@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-secondary mb-2">Official Application Portal</span>
+                        <h1 class="fw-bold text-dark">{{ room.company_name }}</h1>
+                        <h4 class="text-muted">{{ room.room_name }}</h4>
+                    </div>
+
+                    <div class="alert alert-info border-0 shadow-sm">
+                        <h6 class="fw-bold"><i class="bi bi-info-circle"></i> Job Description:</h6>
+                        <p class="mb-0" style="white-space: pre-wrap;">{{ room.job_description }}</p>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" class="mt-4">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Upload Your Resume (PDF)</label>
+                            <input type="file" name="file" class="form-control form-control-lg" accept=".pdf" required>
+                            <div class="form-text">Submit your best resume to match this specific role.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-dark btn-lg">Submit Application</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

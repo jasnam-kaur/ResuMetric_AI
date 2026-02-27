@@ -1,60 +1,176 @@
-from django.shortcuts import render, redirect
-from .forms import ResumeUploadForm
-from .utils import extract_text_from_pdf, clean_resume_text, calculate_match_score
-import fitz
+import os
+import openpyxl
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
+from django.core.files.storage import default_storage
+from django.utils.text import slugify
+from django.utils import timezone
+from django.http import HttpResponse
 
-def upload_resume(request):
+# Import your models and processing utils
+from .models import RecruiterRoom, ResumeSubmission
+from .utils import extract_text_from_pdf, calculate_match_score, extract_skills
+
+# --- 1. Authentication & Registration ---
+
+def landing_page(request):
+    if request.user.is_authenticated:
+        if request.user.profile.role == 'RECRUITER':
+            return redirect('dashboard')
+        return redirect('home_ats_checker')
+    return render(request, 'screening/index.html')
+
+def register(request):
     if request.method == 'POST':
-        form = ResumeUploadForm(request.POST, request.FILES)
-        # Check if jd_text is actually in the POST data
-        jd_text = request.POST.get('jd_text', '')
-        
+        form = UserCreationForm(request.POST)
+        role = request.POST.get('role')
         if form.is_valid():
-            resume_instance = form.save()
-            
-            # 1. Extract and Clean Text
-            raw_text = extract_text_from_pdf(resume_instance.file.path)
-            # Improved Name Extraction
-            lines = [l.strip() for l in raw_text.split('\n') if l.strip()]
-            candidate_name = "Unknown Applicant"
-            
-            # Skip lines that look like addresses or labels
-            for line in lines:
-                if "address" not in line.lower() and ":" not in line:
-                    candidate_name = line
-                    break
-            
-            resume_instance.name = candidate_name
-
-            cleaned_resume = clean_resume_text(raw_text)
-            cleaned_jd = clean_resume_text(jd_text)
-            
-            # 2. DEBUG: Verify in terminal
-            print(f"DEBUG: Resume Length: {len(cleaned_resume)}")
-            print(f"DEBUG: JD Length: {len(cleaned_jd)}")
-            
-            # 3. Calculate Score (ONLY if both texts exist)
-            if len(cleaned_resume) > 0 and len(cleaned_jd) > 0:
-                score = calculate_match_score(cleaned_resume, cleaned_jd)
-            else:
-                score = 0.0
-            
-            # 4. Save the calculated score to the database
-            resume_instance.score = score
-            resume_instance.save()
-            
-            # 5. NOW return the success page with the updated instance
-            return render(request, 'screening/success.html', {'resume': resume_instance})
-    
+            user = form.save()
+            user.profile.role = role
+            user.profile.save()
+            login(request, user)
+            return redirect('dashboard' if role == 'RECRUITER' else 'home_ats_checker')
     else:
-        # This handles the initial page load (GET request)
-        form = ResumeUploadForm()
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+class CustomLoginView(LoginView):
+    template_name = 'registration/login.html'
+    def get_success_url(self):
+        user = self.request.user
+        if hasattr(user, 'profile'):
+            if user.profile.role == 'CANDIDATE':
+                return reverse_lazy('home_ats_checker')
+            elif user.profile.role == 'RECRUITER':
+                return reverse_lazy('dashboard')
+        return reverse_lazy('landing')
+
+# --- 2. Candidate Workspace ---
+
+@login_required
+def home_ats_checker(request):
+    if request.user.profile.role == 'RECRUITER':
+        return redirect('dashboard')
+    score = None
+    if request.method == 'POST' and request.FILES.get('resume'):
+        uploaded_file = request.FILES['resume']
+        jd_text = request.POST.get('jd_text', '')
+        path = default_storage.save('temp/' + uploaded_file.name, uploaded_file)
+        raw_text = extract_text_from_pdf(default_storage.path(path))
+        score = calculate_match_score(raw_text, jd_text)
+        default_storage.delete(path)
+        return render(request, 'screening/home.html', {'score': score})
+    return render(request, 'screening/home.html')
+
+@login_required
+def room_detail(request, slug):
+    room = get_object_or_404(RecruiterRoom, slug=slug)
     
-    # This return handles showing the upload form if method is GET or if form is invalid
-    return render(request, 'screening/upload.html', {'form': form})
+    # Check if room is expired
+    if room.expires_at and timezone.now() > room.expires_at:
+        return render(request, 'screening/room_closed.html', {'room': room})
 
+    if request.method == 'POST' and request.FILES.get('resume'):
+        uploaded_file = request.FILES['resume']
+        path = default_storage.save('temp/' + uploaded_file.name, uploaded_file)
+        raw_text = extract_text_from_pdf(default_storage.path(path))
+        
+        # Core Processing Features
+        score = calculate_match_score(raw_text, room.jd_text)
+        skills = extract_skills(raw_text)
+        
+        # Save submission
+        ResumeSubmission.objects.create(
+            room=room,
+            candidate=request.user,
+            resume_file=uploaded_file,
+            score=score,
+            skills=skills
+        )
+        default_storage.delete(path)
+        return render(request, 'screening/success.html', {'room': room})
+    return render(request, 'screening/room_detail.html', {'room': room})
 
+# --- 3. Recruiter Workspace ---
+
+@login_required
 def dashboard(request):
-    # Retrieve all resumes from the database, highest score first
-    resumes = Resume.objects.all().order_by('-score')
-    return render(request, 'screening/dashboard.html', {'resumes': resumes})
+    if request.user.profile.role == 'CANDIDATE':
+        return redirect('home_ats_checker')
+    rooms = RecruiterRoom.objects.all() if request.user.is_staff else RecruiterRoom.objects.filter(created_by=request.user)
+    return render(request, 'screening/dashboard.html', {'rooms': rooms, 'now': timezone.now()})
+
+@login_required
+def create_room(request):
+    if request.user.profile.role == 'CANDIDATE':
+        return redirect('home_ats_checker')
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        RecruiterRoom.objects.create(
+            created_by=request.user,
+            name=name,
+            slug=slugify(name),
+            jd_text=request.POST.get('jd_text'),
+            expires_at=request.POST.get('expires_at') or None
+        )
+        return redirect('dashboard')
+    return render(request, 'screening/create_room.html')
+
+@login_required
+def delete_room(request, room_id):
+    room = get_object_or_404(RecruiterRoom, id=room_id, created_by=request.user)
+    room.delete()
+    return redirect('dashboard')
+
+# --- 4. Analytics & Reports ---
+
+@login_required
+def compare_skills(request, submission_id):
+    submission = get_object_or_404(ResumeSubmission, id=submission_id)
+    room = submission.room
+    candidate_skills = set(submission.skills.split(", ")) if submission.skills else set()
+    jd_skills = set(extract_skills(room.jd_text).split(", "))
+    
+    # Analysis Logic
+    matched_skills = candidate_skills.intersection(jd_skills)
+    missing_skills = jd_skills - candidate_skills
+    extra_skills = candidate_skills - jd_skills
+
+    # AI Insights Logic
+    if submission.score >= 80:
+        insight = "Strong Match: Candidate possesses most core technical requirements."
+    elif submission.score >= 50:
+        insight = "Potential Match: Good foundation, but some skill gaps identified."
+    else:
+        insight = "Weak Match: Missing significant core requirements for this role."
+
+    context = {
+        'submission': submission,
+        'room': room,
+        'matched_skills': sorted(list(matched_skills)),
+        'missing_skills': sorted(list(missing_skills)),
+        'extra_skills': sorted(list(extra_skills)),
+        'ai_insight': insight
+    }
+    return render(request, 'screening/compare_skills.html', context)
+
+@login_required
+def export_to_excel(request):
+    if request.method == 'POST':
+        ids = request.POST.getlist('selected_ids')
+        submissions = ResumeSubmission.objects.filter(id__in=ids).order_by('-score')
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        ws.title = "Candidate Analysis"
+        ws.append(['Rank', 'Name', 'Email', 'ATS Score', 'Primary Skills', 'Applied Date'])
+        for i, sub in enumerate(submissions, 1):
+            ws.append([i, sub.candidate.username, sub.candidate.email, f"{sub.score}%", sub.skills, sub.submitted_at.strftime('%Y-%m-%d')])
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = 'attachment; filename="Candidate_Report.xlsx"'
+        wb.save(response)
+        return response
+    return redirect('dashboard')

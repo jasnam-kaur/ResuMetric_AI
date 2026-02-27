@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 px-3">
+        <h2>Skill Gap Analysis: {{ submission.candidate.username }}</h2>
+        <a href="{% url 'room_detail' room.slug %}" class="btn btn-outline-secondary">Back to Room</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-primary text-white fw-bold">Candidate Extracted Skills</div>
+                <div class="card-body">
+                    <h6 class="text-muted mb-3">Found in Resume:</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for skill in matched_skills %}
+                            <span class="badge bg-success p-2">✅ {{ skill }}</span>
+                        {% endfor %}
+                        {% for skill in extra_skills %}
+                            <span class="badge bg-info text-dark p-2">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-dark text-white fw-bold">Job Description Requirements</div>
+                <div class="card-body">
+                    <h6 class="text-muted mb-3">Required Keywords:</h6>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for skill in matched_skills %}
+                            <span class="badge border border-success text-success p-2">Match: {{ skill }}</span>
+                        {% endfor %}
+                        {% for skill in missing_skills %}
+                            <span class="badge bg-danger p-2">❌ Missing: {{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 px-3">
+        <div class="alert alert-info border-0 shadow-sm">
+            <strong>ATS Insight:</strong> This candidate possesses 
+            <span class="fw-bold text-success">{{ matched_skills|length }}</span> out of 
+            <span class="fw-bold text-dark">{{ jd_skills|length }}</span> required skills.
+        </div>
+    </div>
+</div>
+{% endblock %}

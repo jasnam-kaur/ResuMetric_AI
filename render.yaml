@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: resumetric-ai
+    env: python
+    buildCommand: ./build.sh
+    startCommand: gunicorn RESUMETRIC_FINAL.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: RESUMETRIC_FINAL.settings

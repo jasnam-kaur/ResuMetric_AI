@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 mb-5">
+            <div class="card shadow border-0 p-4">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold">Instant ATS Score Checker</h2>
+                    <p class="text-muted">Optimize your resume against any job description</p>
+                </div>
+                
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold">Target Job Description</label>
+                        <textarea name="jd_text" class="form-control" rows="5" placeholder="Paste the Job Description here..." required></textarea>
+                    </div>
+                    <div class="mb-4 text-start">
+                        <label class="form-label fw-bold">Upload Your Resume (PDF)</label>
+                        <input type="file" name="resume" class="form-control" accept=".pdf" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Analyze My Resume</button>
+                </form>
+
+                {% if score %}
+                <div class="mt-5 p-4 bg-light rounded text-center border">
+                    <h3>Your Match Score</h3>
+                    <div class="display-3 fw-bold text-primary">{{ score }}%</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 bg-dark text-white p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-7">
+                        <h4 class="mb-1">Apply via Room Code</h4>
+                        <p class="small text-secondary mb-0">Enter the code provided by your recruiter to apply for a specific role.</p>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="input-group">
+                            <input type="text" id="roomCode" class="form-control" placeholder="e.g. xelta-ai-01">
+                            <button class="btn btn-primary" onclick="goToRoom()">Enter Room</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function goToRoom() {
+    const code = document.getElementById('roomCode').value.trim();
+    if (code) {
+        window.location.href = `/room/${code}/`;
+    } else {
+        alert("Please enter a valid room code.");
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="alert alert-success p-5 shadow">
+        <h2>🎉 Room Created Successfully!</h2>
+        <p class="lead">Share this unique link with your candidates:</p>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control text-center" value="http://127.0.0.1:8000/room/{{ room.slug }}/" id="roomLink" readonly>
+        </div>
+        <p>This room is isolated. Only <strong>you</strong> can see the candidates who apply here.</p>
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

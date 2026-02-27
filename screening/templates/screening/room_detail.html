@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active">{{ room.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">{{ room.name }}</h2>
+            <p class="text-muted">Room Code: <code>{{ room.slug }}</code></p>
+        </div>
+        <form action="{% url 'export_to_excel' %}" method="post" id="exportForm">
+            {% csrf_token %}
+            <div id="selectedCandidatesContainer"></div>
+            <button type="submit" class="btn btn-outline-success shadow-sm" id="exportBtn" disabled>
+                📥 Export Selected to Excel
+            </button>
+        </form>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="candidateTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th style="width: 40px;">
+                            <input type="checkbox" class="form-check-input" id="selectAll">
+                        </th>
+                        <th>Rank</th>
+                        <th>Candidate Name</th>
+                        <th>ATS Score</th>
+                        <th>Top Skills Identified</th>
+                        <th>Submission Date</th>
+                        <th class="text-end">Resume</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in room.submissions.all|dictsortreversed:"score" %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="form-check-input candidate-checkbox" name="candidate_ids"
+                                value="{{ sub.id }}">
+                        </td>
+                        <td><strong>#{{ forloop.counter }}</strong></td>
+                        <td>{{ sub.candidate.get_full_name|default:sub.candidate.username }}</td>
+                        <td>
+                            <div class="progress" style="height: 10px; width: 100px;">
+                                <div class="progress-bar {% if sub.score > 70 %}bg-success{% elif sub.score > 40 %}bg-warning{% else %}bg-danger{% endif %}"
+                                    role="progressbar" style="width: {{ sub.score }}%"></div>
+                            </div>
+                            <small class="fw-bold">{{ sub.score }}%</small>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ sub.skills|default:"Python, Django, AWS" }}</small>
+                        </td>
+                        <td>{{ sub.submitted_at|date:"M d, Y" }}</td>
+                        <td class="text-end">
+                            <a href="{{ sub.resume_file.url }}" class="btn btn-sm btn-light border" target="_blank">📄 View</a>
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'compare_skills' sub.id %}" class="btn btn-sm btn-warning">⚖️ Compare
+                                Skills</a>
+                            <a href="{{ sub.resume_file.url }}" class="btn btn-sm btn-light border" target="_blank">📄 Resume</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">No candidates have applied to this room yet.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.candidate-checkbox');
+    const exportBtn = document.getElementById('exportBtn');
+    const container = document.getElementById('selectedCandidatesContainer');
+
+    function updateExportForm() {
+        container.innerHTML = '';
+        let selectedCount = 0;
+
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                selectedCount++;
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'selected_ids';
+                input.value = cb.value;
+                container.appendChild(input);
+            }
+        });
+
+        exportBtn.disabled = selectedCount === 0;
+        exportBtn.innerHTML = selectedCount > 0 ? `📥 Export ${selectedCount} Selected to Excel` : '📥 Export Selected to Excel';
+    }
+
+    selectAll.addEventListener('change', function () {
+        checkboxes.forEach(cb => {
+            cb.checked = this.checked;
+        });
+        updateExportForm();
+    });
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', updateExportForm);
+    });
+</script>
+{% endblock %}
