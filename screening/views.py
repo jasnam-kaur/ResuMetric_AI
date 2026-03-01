@@ -19,9 +19,14 @@ from .utils import extract_text_from_pdf, calculate_match_score, extract_skills
 
 def landing_page(request):
     if request.user.is_authenticated:
-        if request.user.profile.role == 'RECRUITER':
-            return redirect('dashboard')
-        return redirect('home_ats_checker')
+        # Use try/except to prevent the "RelatedObjectDoesNotExist" crash
+        try:
+            if request.user.profile.role == 'RECRUITER':
+                return redirect('dashboard')
+            return redirect('home_ats_checker')
+        except Profile.DoesNotExist:
+            # If profile is missing, create a default one or logout
+            return render(request, 'screening/index.html', {'error': 'Profile missing. Please re-register.'})
     return render(request, 'screening/index.html')
 
 def register(request):
