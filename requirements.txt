@@ -2,9 +2,9 @@ Django==5.0.2
 gunicorn==21.2.0
 whitenoise==6.6.0
 PyMuPDF==1.23.22
-spacy==3.7.2
 scikit-learn==1.4.1.post1
 pandas==2.2.0
 dj-database-url==2.1.0
 openpyxl
 nltk
+# We install spacy separately in build.sh to ensure zero conflicts
