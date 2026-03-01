@@ -19,7 +19,6 @@ from .utils import extract_text_from_pdf, calculate_match_score, extract_skills
 
 def landing_page(request):
     if request.user.is_authenticated:
-        # Use try/except to prevent the "RelatedObjectDoesNotExist" crash
         try:
             if request.user.profile.role == 'RECRUITER':
                 return redirect('dashboard')
@@ -29,24 +28,39 @@ def landing_page(request):
             return render(request, 'screening/index.html', {'error': 'Profile missing. Please re-register.'})
     return render(request, 'screening/index.html')
 
+from .models import Profile # Ensure this is imported
+# screening/views.py
+
+# screening/views.py
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
-        role = request.POST.get('role')
+        role = request.POST.get('role', 'CANDIDATE') 
+        
         if form.is_valid():
             user = form.save()
-            user.profile.role = role
-            user.profile.save()
+            # Safety: Get or create the profile to prevent RelatedObjectDoesNotExist
+            profile, created = Profile.objects.get_or_create(user=user)
+            profile.role = role
+            profile.save()
+            
             login(request, user)
             return redirect('dashboard' if role == 'RECRUITER' else 'home_ats_checker')
-    else:
-        form = UserCreationForm()
-    return render(request, 'registration/register.html', {'form': form})
+        
+        # If form is invalid, stay on the signup page (Fixes ValueError)
+        return render(request, 'registration/signup_unified.html', {'form': form})
+
+    # GET request: Show the unified signup form
+    form = UserCreationForm()
+    return render(request, 'registration/signup_unified.html', {'form': form})
 
 class CustomLoginView(LoginView):
-    template_name = 'registration/login.html'
+    # Updated to the single file you kept
+    template_name = 'registration/login.html' 
+
     def get_success_url(self):
         user = self.request.user
+        # Safely checks for profile to prevent the 'User has no profile' crash
         if hasattr(user, 'profile'):
             if user.profile.role == 'CANDIDATE':
                 return reverse_lazy('home_ats_checker')

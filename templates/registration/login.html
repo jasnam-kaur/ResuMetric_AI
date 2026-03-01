@@ -6,7 +6,7 @@
             <div class="card shadow border-0">
                 <div class="card-header bg-dark text-white text-center py-4">
                     <h3 class="mb-0">ResuMetric AI Portal</h3>
-                    <p class="small mb-0 mt-2 text-secondary">Sign in to access your tools</p>
+                    <p class="small mb-0 mt-2 text-secondary">Sign in to access your profile</p>
                 </div>
                 <div class="card-body p-4">
                     {% if form.errors %}
@@ -26,12 +26,23 @@
                             <input type="password" name="password" class="form-control" id="id_password" required>
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">Sign In</button>
+                            <button type="submit" class="btn btn-primary btn-lg">Log In</button>
                         </div>
                     </form>
                 </div>
-                <div class="card-footer text-center py-3 bg-light">
-                    <a href="{% url 'landing' %}" class="text-decoration-none small">&larr; Back to Selection</a>
+                
+                <div class="card-footer bg-light p-4">
+                    <div class="text-center mb-3">
+                        <span class="text-muted small">New to ResuMetric?</span>
+                        <div class="mt-2">
+                            <a href="{% url 'signup_unified' %}?role=CANDIDATE" class="btn btn-outline-secondary btn-sm me-2">Register as Candidate</a>
+                            <a href="{% url 'signup_unified' %}?role=RECRUITER" class="btn btn-outline-dark btn-sm">Register as Recruiter</a>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <a href="{% url 'landing' %}" class="text-decoration-none small text-muted">&larr; Back to Selection</a>
+                    </div>
                 </div>
             </div>
         </div>
