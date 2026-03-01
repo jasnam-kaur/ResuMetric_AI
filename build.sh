@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
+# exit on error
 set -o errexit
 
-# 1. Install standard requirements
+# 1. Install dependencies from the fixed requirements file
 pip install -r requirements.txt
 
-# 2. Force install the specific spaCy model directly
-# This bypasses URL resolution issues in requirements.txt
-pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0-py3-none-any.whl
+# 2. Download spaCy model (This avoids the 404 URL issue)
+python -m spacy download en_core_web_sm
 
-# 3. Rest of your build commands
+# 3. Download NLTK data
 python -c "import nltk; nltk.download('punkt'); nltk.download('wordnet'); nltk.download('omw-1.4')"
+
+# 4. Standard Django build commands
 python manage.py collectstatic --no-input
 python manage.py migrate
