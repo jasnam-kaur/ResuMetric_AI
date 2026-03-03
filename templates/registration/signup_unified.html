@@ -50,10 +50,13 @@
                                     <span class="input-group-text bg-white border-end-0"><i class="bi bi-shield-lock text-primary"></i></span>
                                     <input type="{{ field.field.widget.input_type }}" 
                                            name="{{ field.html_name }}" 
-                                           class="form-control border-start-0 py-2" 
+                                           class="form-control border-start-0 border-end-0 py-2 password-field" 
                                            id="{{ field.id_for_label }}" 
                                            placeholder="Enter {{ field.label|lower }}" 
                                            required>
+                                    <button class="btn btn-outline-secondary border-start-0 bg-white text-muted toggle-password" type="button">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
                                 </div>
                                 {% if field.help_text %}
                                     <div class="form-text x-small text-muted">{{ field.help_text|safe }}</div>
@@ -87,8 +90,28 @@
 
 <style>
     .form-control:focus, .form-select:focus { box-shadow: none; border-color: #3b71fe; }
-    .input-group:focus-within .input-group-text { border-color: #3b71fe; color: #3b71fe !important; }
+    .input-group:focus-within .input-group-text, 
+    .input-group:focus-within .btn-outline-secondary { border-color: #3b71fe; color: #3b71fe !important; }
     .x-small { font-size: 0.75rem; }
     .input-group-text { border: 1px solid #ced4da; }
 </style>
+
+<script>
+    document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', function () {
+            // Find the input field within the same input-group
+            const passwordInput = this.parentElement.querySelector('input');
+            const icon = this.querySelector('i');
+            
+            // Toggle type and icon class
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        });
+    });
+</script>
 {% endblock %}
