@@ -19,20 +19,48 @@
                         <label class="form-label fw-bold">Upload Your Resume (PDF)</label>
                         <input type="file" name="resume" class="form-control" accept=".pdf" required>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg w-100">Analyze My Resume</button>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3 shadow-sm" style="background-color: #3b71fe; border: none;">Analyze My Resume</button>
                 </form>
 
-                {% if score %}
-                <div class="mt-5 p-4 bg-light rounded text-center border">
-                    <h3>Your Match Score</h3>
-                    <div class="display-3 fw-bold text-primary">{{ score }}%</div>
+                {% if score is not None %}
+                <div class="mt-5 p-4 bg-light rounded text-center border shadow-sm">
+                    <h4 class="text-muted small text-uppercase fw-bold mb-2">Your Match Score</h4>
+                    <div class="display-1 fw-bold text-primary">{{ score }}%</div>
+                </div>
+
+                <div class="card border-0 bg-white shadow-sm rounded-4 mt-4">
+                    <div class="card-body p-4 text-start">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-lightbulb-fill text-warning me-2"></i>How to Improve Your Score
+                        </h5>
+                        
+                        {% if missing_skills %}
+                            <p class="text-muted small">The following key skills were found in the JD but are <strong>missing</strong> from your resume:</p>
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                {% for skill in missing_skills %}
+                                    <span class="badge rounded-pill bg-light text-danger border border-danger-subtle px-3 py-2">
+                                        + {{ skill }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                            <div class="alert alert-info border-0 small mb-0">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                <strong>Pro Tip:</strong> Mentioning these technical keywords naturally in your "Skills" section can significantly improve your ATS ranking.
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success border-0 small mb-0">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <strong>Perfect Match!</strong> Your resume successfully covers all identified skills in this description.
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
                 {% endif %}
             </div>
         </div>
 
         <div class="col-md-8">
-            <div class="card shadow-sm border-0 bg-dark text-white p-4">
+            <div class="card shadow-sm border-0 bg-dark text-white p-4 rounded-4">
                 <div class="row align-items-center">
                     <div class="col-md-7">
                         <h4 class="mb-1">Apply via Room Code</h4>
@@ -40,8 +68,8 @@
                     </div>
                     <div class="col-md-5">
                         <div class="input-group">
-                            <input type="text" id="roomCode" class="form-control" placeholder="e.g. xelta-ai-01">
-                            <button class="btn btn-primary" onclick="goToRoom()">Enter Room</button>
+                            <input type="text" id="roomCode" class="form-control border-0" placeholder="e.g. xelta-ai-01" style="border-radius: 8px 0 0 8px;">
+                            <button class="btn btn-primary px-4 fw-bold" onclick="goToRoom()" style="border-radius: 0 8px 8px 0;">Enter Room</button>
                         </div>
                     </div>
                 </div>
@@ -60,4 +88,11 @@ function goToRoom() {
     }
 }
 </script>
+
+<style>
+    .display-1 { font-size: 5rem; letter-spacing: -2px; }
+    .badge { font-size: 0.85rem; }
+    .btn-primary { background-color: #3b71fe; transition: all 0.3s; }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+</style>
 {% endblock %}

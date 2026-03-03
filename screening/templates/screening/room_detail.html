@@ -10,66 +10,83 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="fw-bold mb-0">{{ room.name }}</h2>
-            <p class="text-muted">Room Code: <code>{{ room.slug }}</code></p>
+            <h2 class="fw-bold mb-0 text-dark">{{ room.name }}</h2>
+            <p class="text-muted">Room Code: <code class="text-primary">{{ room.slug }}</code></p>
         </div>
         <form action="{% url 'export_to_excel' %}" method="post" id="exportForm">
             {% csrf_token %}
             <div id="selectedCandidatesContainer"></div>
-            <button type="submit" class="btn btn-outline-success shadow-sm" id="exportBtn" disabled>
-                📥 Export Selected to Excel
+            <button type="submit" class="btn btn-outline-success shadow-sm fw-bold px-4" id="exportBtn" disabled>
+                <i class="bi bi-file-earmark-excel me-1"></i> Export Selected to Excel
             </button>
         </form>
     </div>
 
-    <div class="card shadow-sm border-0">
+    <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0" id="candidateTable">
-                <thead class="bg-light">
+                <thead class="bg-light text-uppercase small fw-bold text-muted">
                     <tr>
-                        <th style="width: 40px;">
+                        <th class="ps-4" style="width: 40px;">
                             <input type="checkbox" class="form-check-input" id="selectAll">
                         </th>
                         <th>Rank</th>
                         <th>Candidate Name</th>
-                        <th>ATS Score</th>
+                        <th class="text-center">ATS Score</th>
                         <th>Top Skills Identified</th>
                         <th>Submission Date</th>
-                        <th class="text-end">Resume</th>
+                        <th class="text-end pe-4">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for sub in room.submissions.all|dictsortreversed:"score" %}
                     <tr>
-                        <td>
+                        <td class="ps-4">
                             <input type="checkbox" class="form-check-input candidate-checkbox" name="candidate_ids"
                                 value="{{ sub.id }}">
                         </td>
-                        <td><strong>#{{ forloop.counter }}</strong></td>
-                        <td>{{ sub.candidate.get_full_name|default:sub.candidate.username }}</td>
+                        <td><span class="badge bg-light text-dark border">#{{ forloop.counter }}</span></td>
                         <td>
-                            <div class="progress" style="height: 10px; width: 100px;">
-                                <div class="progress-bar {% if sub.score > 70 %}bg-success{% elif sub.score > 40 %}bg-warning{% else %}bg-danger{% endif %}"
-                                    role="progressbar" style="width: {{ sub.score }}%"></div>
+                            <div class="fw-bold">{{ sub.candidate.get_full_name|default:sub.candidate.username }}</div>
+                            <small class="text-muted">{{ sub.candidate.email }}</small>
+                        </td>
+                        <td class="text-center">
+                            {% if sub.score >= 80 %}
+                                <span class="badge rounded-pill bg-success px-3 py-2 shadow-sm" style="min-width: 110px;">
+                                    <i class="bi bi-star-fill me-1"></i> Strong: {{ sub.score }}%
+                                </span>
+                            {% elif sub.score >= 50 %}
+                                <span class="badge rounded-pill bg-warning text-dark px-3 py-2 shadow-sm" style="min-width: 110px;">
+                                    <i class="bi bi-hand-thumbs-up me-1"></i> Potential: {{ sub.score }}%
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-danger px-3 py-2 shadow-sm" style="min-width: 110px;">
+                                    <i class="bi bi-exclamation-triangle me-1"></i> Weak: {{ sub.score }}%
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 200px;">
+                                <small class="text-muted">{{ sub.skills|default:"No skills extracted" }}</small>
                             </div>
-                            <small class="fw-bold">{{ sub.score }}%</small>
                         </td>
-                        <td>
-                            <small class="text-muted">{{ sub.skills|default:"Python, Django, AWS" }}</small>
-                        </td>
-                        <td>{{ sub.submitted_at|date:"M d, Y" }}</td>
-                        <td class="text-end">
-                            <a href="{{ sub.resume_file.url }}" class="btn btn-sm btn-light border" target="_blank">📄 View</a>
-                        </td>
-                        <td class="text-end">
-                            <a href="{% url 'compare_skills' sub.id %}" class="btn btn-sm btn-warning">⚖️ Compare
-                                Skills</a>
-                            <a href="{{ sub.resume_file.url }}" class="btn btn-sm btn-light border" target="_blank">📄 Resume</a>
+                        <td><small>{{ sub.submitted_at|date:"M d, Y" }}</small></td>
+                        <td class="text-end pe-4">
+                            <div class="btn-group">
+                                <a href="{% url 'compare_skills' sub.id %}" class="btn btn-sm btn-outline-primary" title="Compare Skills">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </a>
+                                <a href="{{ sub.resume_file.url }}" class="btn btn-sm btn-light border" target="_blank" title="View Resume">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="7" class="text-center py-5 text-muted">No candidates have applied to this room yet.
+                        <td colspan="7" class="text-center py-5">
+                            <i class="bi bi-people display-4 text-muted"></i>
+                            <p class="text-muted mt-3">No candidates have applied to this room yet.</p>
                         </td>
                     </tr>
                     {% endfor %}
@@ -78,6 +95,14 @@
         </div>
     </div>
 </div>
+
+<style>
+    .badge { font-weight: 600; }
+    .table thead th { border-top: none; }
+    .breadcrumb-item a { text-decoration: none; color: #3b71fe; }
+    .btn-outline-primary { border-color: #3b71fe; color: #3b71fe; }
+    .btn-outline-primary:hover { background-color: #3b71fe; color: white; }
+</style>
 
 <script>
     const selectAll = document.getElementById('selectAll');
@@ -101,7 +126,7 @@
         });
 
         exportBtn.disabled = selectedCount === 0;
-        exportBtn.innerHTML = selectedCount > 0 ? `📥 Export ${selectedCount} Selected to Excel` : '📥 Export Selected to Excel';
+        exportBtn.innerHTML = selectedCount > 0 ? `📥 Export ${selectedCount} Selected` : '📥 Export Selected to Excel';
     }
 
     selectAll.addEventListener('change', function () {

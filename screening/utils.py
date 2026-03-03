@@ -1,15 +1,27 @@
-import fitz  # Standard for PyMuPDF 1.23.22
+import fitz  # Standard for PyMuPDF
 import re
 import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load spaCy for Lemmatization
-# Make sure to run: python -m spacy download en_core_web_sm
+# Load spaCy for Lemmatization [cite: 1]
 nlp = spacy.load("en_core_web_sm")
 
+# --- 1. Synonym Mapping ---
+# Maps technical terms to broader categories to ensure high-accuracy matching.
+SYNONYM_MAP = {
+    'django': ['web framework', 'python backend', 'mvc'],
+    'react': ['frontend', 'javascript library', 'spa', 'web development'],
+    'docker': ['containerization', 'devops', 'kubernetes'],
+    'aws': ['cloud computing', 'amazon web services', 'cloud infrastructure'],
+    'postgresql': ['sql', 'relational database', 'postgres', 'dbms'],
+    'scikit-learn': ['machine learning', 'data science', 'ai'],
+    'tensorflow': ['deep learning', 'neural networks', 'ai'],
+    'agile': ['scrum', 'kanban', 'project management'],
+}
+
 def extract_text_from_pdf(pdf_path):
-    """Keep this function so views.py can find it!"""
+    """Extracts raw text from a PDF file."""
     text = ""
     try:
         with fitz.open(pdf_path) as doc:
@@ -20,54 +32,66 @@ def extract_text_from_pdf(pdf_path):
     return text
 
 def clean_resume_text(text):
-    """Advanced cleaning using NLP Lemmatization"""
+    """
+    Advanced cleaning using NLP Lemmatization.
+    Fixes the 'Python(Basics)' issue by replacing parentheses with spaces.
+    """
     text = text.lower()
+    
+    # CRITICAL FIX: Replace parentheses with spaces so 'Python(Basics)' becomes 'python basics' 
+    text = text.replace('(', ' ').replace(')', ' ') 
+    
+    # Remove extra whitespace [cite: 1]
     text = re.sub(r'\s+', ' ', text)
     
-    # Process text through spaCy
+    # Process text through spaCy [cite: 1]
     doc = nlp(text)
-    # Reduces words to root (e.g., 'programming' -> 'program')
+    
+    # Lemmatize and remove stop words/punctuation [cite: 1]
     lemmatized = " ".join([token.lemma_ for token in doc if not token.is_stop and token.is_alpha])
     return lemmatized.strip()
 
 def calculate_match_score(resume_text, jd_text):
+    """Calculates a weighted match score and identifies missing skills."""
     if not resume_text or not jd_text:
-        return 0.0
+        return 0.0, []
     
     clean_resume = clean_resume_text(resume_text)
     clean_jd = clean_resume_text(jd_text)
     
-    # 1. Base TF-IDF Similarity (Global context)
+    # Skill Extraction [cite: 1]
+    resume_skills_str = extract_skills(resume_text)
+    jd_skills_str = extract_skills(jd_text)
+    
+    resume_skills = set(resume_skills_str.split(", ")) if resume_skills_str != "No skills identified" else set()
+    jd_skills = set(jd_skills_str.split(", ")) if jd_skills_str != "No skills identified" else set()
+    
+    # Identify Missing Skills (Set Difference) [cite: 1]
+    missing_skills = list(jd_skills.difference(resume_skills))
+    
+    # 1. Base TF-IDF Similarity (60% weight) [cite: 1]
     vectorizer = TfidfVectorizer(ngram_range=(1, 2))
     tfidf_matrix = vectorizer.fit_transform([clean_resume, clean_jd])
     base_similarity = float(cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]) * 100
-
-    # 2. Hard Skill Matcher (Weighted Bonus)
-    # Extract sets of skills from both
-    resume_skills = set(extract_skills(resume_text).split(", "))
-    jd_skills = set(extract_skills(jd_text).split(", "))
     
-    if not jd_skills:
-        return round(base_similarity, 2)
-
-    # Calculate what percentage of JD skills are present
-    matched_skills = resume_skills.intersection(jd_skills)
-    skill_match_ratio = len(matched_skills) / len(jd_skills)
+    # 2. Hard Skill Matcher (40% weight) [cite: 1]
+    skill_match_ratio = len(resume_skills.intersection(jd_skills)) / len(jd_skills) if jd_skills else 0
     
-    # 3. Final Weighted Formula
-    # 60% weight to TF-IDF (Overall context)
-    # 40% weight to Hard Skill Match (Precision)
     final_score = (base_similarity * 0.6) + (skill_match_ratio * 100 * 0.4)
     
-    return round(min(final_score, 100.0), 2)
+    # Return both the score and the sorted list of missing items [cite: 1]
+    return round(min(final_score, 100.0), 2), sorted(missing_skills)
 
 def extract_skills(text):
-    doc = nlp(text.lower())
-    lemmatized_tokens = [token.lemma_ for token in doc if not token.is_stop and not token.is_punct]
-    """
-    Checklist Item: Dynamic Skill Extraction
-    Uses Lemmatization to match resume text against the Global Skill DB.
-    """
+    """Matches text against the Global Skill DB using lemmatization and synonyms."""
+    text_lower = text.lower()
+    
+    # Pre-clean the text for matching 
+    processed_text = text_lower.replace('(', ' ').replace(')', ' ')
+    doc = nlp(processed_text)
+    lemmatized_text = " ".join([token.lemma_ for token in doc if not token.is_stop and token.is_alpha])
+    
+    # The Global Skill DB [cite: 1]
     SKILL_DB = [
         # --- IT, CLOUD & DEVOPS ---
         'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform', 'Ansible', 'Puppet', 
@@ -124,19 +148,22 @@ def extract_skills(text):
         'Technical Support', 'Multilingual', 'Crisis Management', 'Adaptability', 'Critical Thinking'
     ]
     
-    # Step 1: Lemmatize the resume text to catch root words
-    lemmatized_text = clean_resume_text(text)
+    found_skills = set()
     
-    found_skills = []
-    
-    # Step 2: Match against the database
     for skill in SKILL_DB:
-        # Regex \b ensures whole word matching
-        pattern = r'\b' + re.escape(skill.lower()) + r'\b'
+        skill_lower = skill.lower()
+        # Direct word matching [cite: 1]
+        pattern = r'\b' + re.escape(skill_lower) + r'\b'
+        
         if re.search(pattern, lemmatized_text):
-            found_skills.append(skill)
+            found_skills.add(skill)
+        elif skill_lower in SYNONYM_MAP:
+            # Check for synonyms if direct match fails [cite: 1]
+            for synonym in SYNONYM_MAP[skill_lower]:
+                syn_pattern = r'\b' + re.escape(synonym) + r'\b'
+                if re.search(syn_pattern, lemmatized_text):
+                    found_skills.add(skill)
+                    break
             
-    unique_skills = sorted(list(set(found_skills)))
+    unique_skills = sorted(list(found_skills))
     return ", ".join(unique_skills) if unique_skills else "No skills identified"
-
-    return ", ".join(set(found_skills))

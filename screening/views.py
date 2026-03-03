@@ -74,22 +74,35 @@ class CustomLoginView(LoginView):
 def home_ats_checker(request):
     if request.user.profile.role == 'RECRUITER':
         return redirect('dashboard')
+    
     score = None
+    missing_skills = [] # Initialize as empty list
+    
     if request.method == 'POST' and request.FILES.get('resume'):
         uploaded_file = request.FILES['resume']
         jd_text = request.POST.get('jd_text', '')
+        
+        # Save file temporarily
         path = default_storage.save('temp/' + uploaded_file.name, uploaded_file)
         raw_text = extract_text_from_pdf(default_storage.path(path))
-        score = calculate_match_score(raw_text, jd_text)
+        
+        # UNPACKING: Catch both the score and the list of missing skills
+        score, missing_skills = calculate_match_score(raw_text, jd_text)
+        
         default_storage.delete(path)
-        return render(request, 'screening/home.html', {'score': score})
+        
+        # Send both to the template separately to fix the "(26.32, ['React'])%" bug
+        return render(request, 'screening/home.html', {
+            'score': score, 
+            'missing_skills': missing_skills
+        })
+        
     return render(request, 'screening/home.html')
 
 @login_required
 def room_detail(request, slug):
     room = get_object_or_404(RecruiterRoom, slug=slug)
     
-    # Check if room is expired
     if room.expires_at and timezone.now() > room.expires_at:
         return render(request, 'screening/room_closed.html', {'room': room})
 
@@ -98,8 +111,8 @@ def room_detail(request, slug):
         path = default_storage.save('temp/' + uploaded_file.name, uploaded_file)
         raw_text = extract_text_from_pdf(default_storage.path(path))
         
-        # Core Processing Features
-        score = calculate_match_score(raw_text, room.jd_text)
+        # UNPACKING: Capture score and missing skills for database storage
+        score, missing_skills_list = calculate_match_score(raw_text, room.jd_text)
         skills = extract_skills(raw_text)
         
         # Save submission
@@ -107,13 +120,19 @@ def room_detail(request, slug):
             room=room,
             candidate=request.user,
             resume_file=uploaded_file,
-            score=score,
+            score=score, # Just the numeric score goes here
             skills=skills
         )
         default_storage.delete(path)
-        return render(request, 'screening/success.html', {'room': room})
+        
+        # Optional: Pass missing_skills to success page to guide the candidate
+        return render(request, 'screening/success.html', {
+            'room': room,
+            'score': score,
+            'missing_skills': missing_skills_list
+        })
+        
     return render(request, 'screening/room_detail.html', {'room': room})
-
 # --- 3. Recruiter Workspace ---
 
 @login_required
@@ -181,7 +200,8 @@ def compare_skills(request, submission_id):
 def export_to_excel(request):
     if request.method == 'POST':
         ids = request.POST.getlist('selected_ids')
-        submissions = ResumeSubmission.objects.filter(id__in=ids).order_of('-score')
+        # Corrected: .order_by('-score') instead of .order_of
+        submissions = ResumeSubmission.objects.filter(id__in=ids).order_by('-score')
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Candidate Analysis"
