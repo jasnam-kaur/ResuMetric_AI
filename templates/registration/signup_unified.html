@@ -24,10 +24,10 @@
                                 a:</label>
                             <select name="role" id="role_selection"
                                 class="form-select border-0 bg-transparent fw-bold text-primary shadow-none">
-                                <option value="CANDIDATE" {% if request.GET.role !='RECRUITER' %}selected{% endif %}>
+                                <option value="CANDIDATE" {% if request.GET.role != 'RECRUITER' %}selected{% endif %}>
                                     Candidate (Job Seeker)
                                 </option>
-                                <option value="RECRUITER" {% if request.GET.role=='RECRUITER' %}selected{% endif %}>
+                                <option value="RECRUITER" {% if request.GET.role == 'RECRUITER' %}selected{% endif %}>
                                     Recruiter (Hiring Manager)
                                 </option>
                             </select>
@@ -138,7 +138,7 @@
         button.addEventListener('click', function () {
             const passwordInput = this.parentElement.querySelector('input');
             const icon = this.querySelector('#eyeIcon');
-            
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 icon.textContent = 'visibility_off'; // Glyphicon-style 'hide' icon
