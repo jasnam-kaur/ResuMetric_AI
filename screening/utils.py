@@ -62,6 +62,8 @@ def calculate_match_score(resume_text, jd_text):
     return round(min(final_score, 100.0), 2)
 
 def extract_skills(text):
+    doc = nlp(text.lower())
+    lemmatized_tokens = [token.lemma_ for token in doc if not token.is_stop and not token.is_punct]
     """
     Checklist Item: Dynamic Skill Extraction
     Uses Lemmatization to match resume text against the Global Skill DB.
@@ -136,3 +138,5 @@ def extract_skills(text):
             
     unique_skills = sorted(list(set(found_skills)))
     return ", ".join(unique_skills) if unique_skills else "No skills identified"
+
+    return ", ".join(set(found_skills))

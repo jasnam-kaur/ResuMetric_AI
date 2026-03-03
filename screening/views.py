@@ -181,7 +181,7 @@ def compare_skills(request, submission_id):
 def export_to_excel(request):
     if request.method == 'POST':
         ids = request.POST.getlist('selected_ids')
-        submissions = ResumeSubmission.objects.filter(id__in=ids).order_by('-score')
+        submissions = ResumeSubmission.objects.filter(id__in=ids).order_of('-score')
         wb = openpyxl.Workbook()
         ws = wb.active
         ws.title = "Candidate Analysis"

@@ -10,7 +10,7 @@
                 </div>
                 <div class="card-body p-4">
                     {% if form.errors %}
-                    <div class="alert alert-danger">
+                    <div class="alert alert-danger py-2 small">
                         Your username and password didn't match. Please try again.
                     </div>
                     {% endif %}
@@ -18,15 +18,22 @@
                     <form method="post" action="{% url 'login' %}">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label for="id_username" class="form-label fw-bold">Username</label>
+                            <label for="id_username" class="form-label fw-bold small">Username</label>
                             <input type="text" name="username" class="form-control" id="id_username" required>
                         </div>
+                        
                         <div class="mb-4">
-                            <label for="id_password" class="form-label fw-bold">Password</label>
-                            <input type="password" name="password" class="form-control" id="id_password" required>
+                            <label for="id_password" class="form-label fw-bold small">Password</label>
+                            <div class="input-group">
+                                <input type="password" name="password" class="form-control border-end-0" id="id_password" required>
+                                <button class="btn btn-outline-secondary border-start-0 bg-white text-muted" type="button" id="togglePassword">
+                                    <i class="bi bi-eye" id="eyeIcon"></i>
+                                </button>
+                            </div>
                         </div>
+
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">Log In</button>
+                            <button type="submit" class="btn btn-primary btn-lg fw-bold" style="background-color: #3b71fe; border: none;">Log In</button>
                         </div>
                     </form>
                 </div>
@@ -48,4 +55,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#id_password');
+    const eyeIcon = document.querySelector('#eyeIcon');
+
+    togglePassword.addEventListener('click', function (e) {
+        // Toggle the type attribute
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        
+        // Toggle the icon
+        eyeIcon.classList.toggle('bi-eye');
+        eyeIcon.classList.toggle('bi-eye-slash');
+    });
+</script>
 {% endblock %}
