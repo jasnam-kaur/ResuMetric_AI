@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
@@ -16,21 +18,16 @@
                     </div>
                     {% endif %}
 
-                    <form method="post">
+                    <form method="post" id="signupForm">
                         {% csrf_token %}
 
                         <div class="mb-4 bg-light p-3 rounded-3 border">
-                            <label for="role_selection" class="form-label fw-bold small text-muted text-uppercase">I am
+                            <label for="id_role" class="form-label fw-bold small text-muted text-uppercase">I am
                                 a:</label>
-                            <select name="role" id="role_selection"
-                                class="form-select border-0 bg-transparent fw-bold text-primary shadow-none">
-                                <option value="CANDIDATE" {% if request.GET.role != 'RECRUITER' %}selected{% endif %}>
-                                    Candidate (Job Seeker)
-                                </option>
-                                <option value="RECRUITER" {% if request.GET.role == 'RECRUITER' %}selected{% endif %}>
-                                    Recruiter (Hiring Manager)
-                                </option>
-                            </select>
+                            {{ form.role }}
+                            {% if form.role.errors %}
+                            <div class="text-danger x-small mt-1">{{ form.role.errors.0 }}</div>
+                            {% endif %}
                         </div>
 
                         <div class="mb-3">
@@ -48,7 +45,7 @@
                         </div>
 
                         {% for field in form %}
-                        {% if field.name != 'username' %}
+                        {% if field.name != 'username' and field.name != 'role' %}
                         <div class="mb-3">
                             <label for="{{ field.id_for_label }}"
                                 class="form-label fw-bold small text-muted text-uppercase">{{ field.label }}</label>
@@ -58,9 +55,10 @@
                                 <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}"
                                     class="form-control border-start-0 border-end-0 py-2 password-field"
                                     id="{{ field.id_for_label }}" placeholder="Enter {{ field.label|lower }}" required>
+
                                 <button class="btn btn-outline-secondary border-start-0 bg-white toggle-password"
-                                    type="button" id="togglePassword" style="border-color: #ced4da;">
-                                    <span class="material-icons" id="eyeIcon"
+                                    type="button" style="border-color: #ced4da;">
+                                    <span class="material-icons eye-icon"
                                         style="color: #000000 !important; vertical-align: middle; font-size: 20px;">
                                         visibility
                                     </span>
@@ -101,6 +99,7 @@
 </div>
 
 <style>
+    /* Focus and styling enhancements */
     .form-control:focus,
     .form-select:focus {
         box-shadow: none;
@@ -112,18 +111,6 @@
         border-color: #3b71fe;
     }
 
-    /* Force eye icons to black across all states */
-    .toggle-password i {
-        color: #000000 !important;
-        font-size: 1.1rem;
-    }
-
-    /* Prevent color change on hover or focus to keep it black */
-    .btn-outline-secondary:hover i,
-    .input-group:focus-within .btn-outline-secondary i {
-        color: #000000 !important;
-    }
-
     .x-small {
         font-size: 0.75rem;
     }
@@ -131,22 +118,36 @@
     .input-group-text {
         border: 1px solid #ced4da;
     }
+
+    .eye-icon {
+        color: #000000 !important;
+    }
 </style>
 
 <script>
+    // 1. Password Visibility Toggle
     document.querySelectorAll('.toggle-password').forEach(button => {
         button.addEventListener('click', function () {
-            const passwordInput = this.parentElement.querySelector('input');
-            const icon = this.querySelector('#eyeIcon');
+            const passwordInput = this.closest('.input-group').querySelector('input');
+            const icon = this.querySelector('.eye-icon');
 
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                icon.textContent = 'visibility_off'; // Glyphicon-style 'hide' icon
+                icon.textContent = 'visibility_off';
             } else {
                 passwordInput.type = 'password';
-                icon.textContent = 'visibility'; // Glyphicon-style 'show' icon
+                icon.textContent = 'visibility';
             }
         });
+    });
+
+    // 2. Role Enforcement Script: Syncs the UI with the URL parameter
+    window.addEventListener('load', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const roleParam = urlParams.get('role');
+        if (roleParam) {
+            document.getElementById('role_selection').value = roleParam.toUpperCase();
+        }
     });
 </script>
 {% endblock %}

@@ -7,35 +7,52 @@
                 <div class="card-body p-5">
                     <div class="mb-4">
                         <div class="display-1 text-success">
-                           <i class="bi bi-check-circle-fill"></i>
+                            <i class="bi bi-check-circle-fill"></i>
                         </div>
                     </div>
-                    
+
                     {% if room %}
                     <h2 class="fw-bold text-dark">Application Submitted!</h2>
                     <p class="text-muted mb-4">
-                        Thank you, <strong>{{ resume.name }}</strong>. Your resume has been successfully uploaded to the 
-                        <strong>{{ room.company_name }}</strong> recruitment portal.
+                        Thank you, <strong>{{ user.username }}</strong>. Your resume has been successfully uploaded to the
+                        <strong>{{ room.name }}</strong> recruitment portal.
                     </p>
                     {% else %}
                     <h2 class="fw-bold text-dark">Analysis Complete!</h2>
                     <p class="text-muted mb-4">Here is how your resume matches the provided Job Description.</p>
                     {% endif %}
-                    
+
                     <hr class="my-4">
-                    
+
                     <div class="bg-light p-4 rounded-3 mb-4">
                         <h5 class="text-secondary text-uppercase small fw-bold mb-3">AI Match Score</h5>
-                        <div class="display-3 fw-bold text-primary">{{ resume.score }}%</div>
+                        
+                        <div class="display-1 fw-bold text-primary">{{ score }}%</div>
+                        
                         <div class="progress mt-3" style="height: 10px;">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ resume.score }}%" aria-valuenow="{{ resume.score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ score }}%"
+                                aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                         <p class="mt-3 small text-muted">
                             Calculated using TF-IDF Vectorization and Cosine Similarity logic.
                         </p>
                     </div>
 
-                    <div class="d-grid gap-2">
+                    {# Logic to show missing skills if they exist in the context #}
+                    {% if missing_skills %}
+                    <div class="text-start mt-4">
+                        <h6 class="fw-bold text-danger mb-3">Missing Skills to Improve Your Score:</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for skill in missing_skills %}
+                            <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-2">
+                                + {{ skill }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-grid gap-2 mt-5">
                         <a href="{% url 'home_ats_checker' %}" class="btn btn-outline-secondary">Return to Home</a>
                     </div>
                 </div>

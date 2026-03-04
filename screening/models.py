@@ -23,12 +23,13 @@ class RecruiterRoom(models.Model):
     def __str__(self):
         return self.name
 
-# Add this model to fix the ImportError
 class ResumeSubmission(models.Model):
     room = models.ForeignKey(RecruiterRoom, on_delete=models.CASCADE, related_name='submissions')
     candidate = models.ForeignKey(User, on_delete=models.CASCADE)
     resume_file = models.FileField(upload_to='submissions/')
     score = models.FloatField()
+    # ADD THIS LINE: To store extracted skills as a string
+    skills = models.TextField(default="No skills identified") 
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

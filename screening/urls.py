@@ -20,7 +20,6 @@ urlpatterns = [
     path('delete-room/<int:room_id>/', views.delete_room, name='delete_room'),
     
     # Room & Analytics
-    path('room/<slug:slug>/', views.room_detail, name='room_detail'),
     path('compare/<int:submission_id>/', views.compare_skills, name='compare_skills'),
     path('export-excel/', views.export_to_excel, name='export_to_excel'),
 ]

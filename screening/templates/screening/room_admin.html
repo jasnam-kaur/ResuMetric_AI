@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none">Dashboard</a></li>
+            <li class="breadcrumb-item active">{{ room.name }}</li>
+        </ol>
+    </nav>
+
+    <form action="{% url 'export_to_excel' %}" method="post" id="exportForm">
+        {% csrf_token %}
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-0">{{ room.name }}</h2>
+                <p class="text-muted">Room Code: <code class="text-primary">{{ room.slug }}</code></p>
+            </div>
+            <button type="submit" class="btn btn-outline-success fw-bold px-4 shadow-sm">
+                <i class="bi bi-file-earmark-excel me-2"></i>Export Selected to Excel
+            </button>
+        </div>
+
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr class="text-uppercase small fw-bold text-muted">
+                            <th class="ps-4">
+                                <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleAll(this)">
+                            </th>
+                            <th>Rank</th>
+                            <th>Candidate Name</th>
+                            <th>ATS Score</th>
+                            <th>Top Skills Identified</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in submissions %}
+                        <tr>
+                            <td class="ps-4">
+                                <input type="checkbox" name="selected_ids" value="{{ sub.id }}" class="form-check-input candidate-checkbox">
+                            </td>
+                            <td class="fw-bold text-primary">#{{ forloop.counter }}</td>
+                            <td>
+                                <div class="fw-bold">{{ sub.candidate.username }}</div>
+                                <small class="text-muted">{{ sub.candidate.email }}</small>
+                            </td>
+                            <td>
+                                <div class="badge rounded-pill {% if sub.score >= 70 %}bg-success{% elif sub.score >= 40 %}bg-warning{% else %}bg-danger{% endif %} px-3 py-2">
+                                    {{ sub.score }}%
+                                </div>
+                            </td>
+                            <td>
+                                <div class="skill-container">
+                                    <p class="mb-1 small text-truncate" style="max-width: 200px;" id="skill-text-{{ sub.id }}">
+                                        {{ sub.skills }}
+                                    </p>
+                                    <button class="btn btn-sm p-0 text-primary small fw-bold" type="button" onclick="toggleSkills({{ sub.id }})" id="btn-{{ sub.id }}">
+                                        + Show All
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <a href="{{ sub.resume_file.url }}" target="_blank" class="btn btn-sm btn-outline-dark me-1">
+                                    <i class="bi bi-file-pdf"></i> View PDF
+                                </a>
+                                <a href="{% url 'compare_skills' sub.id %}" class="btn btn-sm btn-primary">Analyze Gap</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <p class="text-muted mt-3">No candidates have applied to this room yet.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+// Logic to select or deselect all candidates at once
+function toggleAll(master) {
+    const checkboxes = document.getElementsByClassName('candidate-checkbox');
+    for (let i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].checked = master.checked;
+    }
+}
+
+function toggleSkills(id) {
+    const text = document.getElementById(`skill-text-${id}`);
+    const btn = document.getElementById(`btn-${id}`);
+    if (text.style.maxWidth === "200px" || text.style.maxWidth === "") {
+        text.style.maxWidth = "none";
+        text.classList.remove('text-truncate');
+        btn.innerText = "- Hide";
+    } else {
+        text.style.maxWidth = "200px";
+        text.classList.add('text-truncate');
+        btn.innerText = "+ Show All";
+    }
+}
+</script>
+{% endblock %}
