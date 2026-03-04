@@ -23,6 +23,9 @@ class RecruiterRoom(models.Model):
     def __str__(self):
         return self.name
 
+from django.db import models
+from django.contrib.auth.models import User
+
 class ResumeSubmission(models.Model):
     room = models.ForeignKey(RecruiterRoom, on_delete=models.CASCADE, related_name='submissions')
     candidate = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -31,5 +34,11 @@ class ResumeSubmission(models.Model):
     skills = models.TextField(default="No skills identified") 
     submitted_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        # Constraint: One candidate can have only one submission per room
+        constraints = [
+            models.UniqueConstraint(fields=['room', 'candidate'], name='unique_candidate_submission_per_room')
+        ]
+
     def __str__(self):
-        return f"{self.candidate.username} - {self.room.name} ({self.score}%)"
+        return f"{self.candidate.username} - {self.room.slug} ({self.score}%)"

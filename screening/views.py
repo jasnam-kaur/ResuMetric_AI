@@ -9,6 +9,7 @@ from django.core.files.storage import default_storage
 from django.utils.text import slugify
 from django.utils import timezone
 from django.http import HttpResponse
+from django.contrib import messages
 
 from .models import RecruiterRoom, ResumeSubmission, Profile
 from .forms import ExtendedUserCreationForm
@@ -60,7 +61,7 @@ class CustomLoginView(LoginView):
 
 @login_required
 def home_ats_checker(request):
-    """Direct ATS check for candidates (no room required)."""
+    """ATS check for candidates and Room-based application logic."""
     if request.user.profile.role == 'RECRUITER':
         return redirect('dashboard')
     
@@ -70,24 +71,57 @@ def home_ats_checker(request):
     if request.method == 'POST' and request.FILES.get('resume'):
         uploaded_file = request.FILES['resume']
         jd_text = request.POST.get('jd_text', '')
-        
+        room_code = request.POST.get('room_code')  # Get room code if available
+
+        # 1. Logic for Room-Based Applications
+        if room_code:
+            try:
+                room = RecruiterRoom.objects.get(slug=room_code)
+                
+                # Check if this candidate has already applied to this specific room
+                already_applied = ResumeSubmission.objects.filter(
+                    candidate=request.user, 
+                    room=room
+                ).exists()
+
+                if already_applied:
+                    messages.warning(request, f"You have already submitted an application to room {room_code}.")
+                    return redirect('home_ats_checker')
+                
+            except RecruiterRoom.DoesNotExist:
+                messages.error(request, "The hiring room code is invalid.")
+                return redirect('home_ats_checker')
+
+        # 2. Process the PDF
         path = default_storage.save('temp/' + uploaded_file.name, uploaded_file)
         raw_text = extract_text_from_pdf(default_storage.path(path))
-        
         score, missing_skills = calculate_match_score(raw_text, jd_text)
         
+        # 3. Save submission if it's for a room
+        if room_code:
+            ResumeSubmission.objects.create(
+                candidate=request.user,
+                room=room,
+                resume_file=uploaded_file,
+                score=score,
+                skills=", ".join(missing_skills) 
+            )
+            messages.success(request, f"Application submitted successfully to room {room_code}!")
+
         default_storage.delete(path)
         
         return render(request, 'screening/home.html', {
             'score': score, 
-            'missing_skills': missing_skills
+            'missing_skills': missing_skills,
+            'room_applied': room_code
         })
         
     return render(request, 'screening/home.html')
 
-
 from django.shortcuts import render, redirect
 from django.core.exceptions import ObjectDoesNotExist
+
+from django.contrib import messages # Import for user feedback
 
 @login_required
 def room_detail(request, slug):
@@ -100,6 +134,7 @@ def room_detail(request, slug):
             'attempted_code': slug
         })
     
+    # 1. Recruiter View
     if request.user.profile.role == 'RECRUITER':
         submissions = room.submissions.all().order_by('-score')
         return render(request, 'screening/room_admin.html', {
@@ -107,10 +142,23 @@ def room_detail(request, slug):
             'submissions': submissions
         })
 
+    # 2. Expiry Check
     if room.expires_at and timezone.now() > room.expires_at:
         return render(request, 'screening/room_closed.html', {'room': room})
 
+    # 3. Handling POST Request
     if request.method == 'POST' and request.FILES.get('resume'):
+        
+        # 🛡️ PRE-SAVE CHECK: Prevent IntegrityError
+        already_applied = ResumeSubmission.objects.filter(
+            room=room, 
+            candidate=request.user
+        ).exists()
+
+        if already_applied:
+            messages.warning(request, f"You have already applied to {room.name}.")
+            return redirect('room_detail', slug=slug)
+
         uploaded_file = request.FILES['resume']
         path = default_storage.save('temp/' + uploaded_file.name, uploaded_file)
         raw_text = extract_text_from_pdf(default_storage.path(path))
@@ -118,6 +166,7 @@ def room_detail(request, slug):
         score, missing_skills_list = calculate_match_score(raw_text, room.jd_text)
         skills = extract_skills(raw_text)
         
+        # 🛡️ CREATE: This only fires if 'already_applied' is False
         ResumeSubmission.objects.create(
             room=room,
             candidate=request.user,
