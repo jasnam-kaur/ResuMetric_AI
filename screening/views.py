@@ -10,12 +10,10 @@ from django.utils.text import slugify
 from django.utils import timezone
 from django.http import HttpResponse
 
-# Import your models, corrected form, and processing utils
 from .models import RecruiterRoom, ResumeSubmission, Profile
 from .forms import ExtendedUserCreationForm
 from .utils import extract_text_from_pdf, calculate_match_score, extract_skills
 
-# --- 1. Authentication & Registration ---
 
 def landing_page(request):
     """Checks authentication and redirects to the correct workspace."""
@@ -35,11 +33,9 @@ def register(request):
     if request.method == 'POST':
         form = ExtendedUserCreationForm(request.POST)
         if form.is_valid():
-            # This call now handles both User and Profile role saving
             user = form.save() 
             
             login(request, user)
-            # Redirect based on the profile role we just saved
             if user.profile.role == 'RECRUITER':
                 return redirect('dashboard')
             return redirect('home_ats_checker')
@@ -54,7 +50,6 @@ class CustomLoginView(LoginView):
 
     def get_success_url(self):
         user = self.request.user
-        # Safely checks for profile to prevent 'User has no profile' crashes
         if hasattr(user, 'profile'):
             if user.profile.role == 'RECRUITER':
                 return reverse_lazy('dashboard')
@@ -62,7 +57,6 @@ class CustomLoginView(LoginView):
         return reverse_lazy('landing')
 
 
-# --- 2. Candidate Workspace ---
 
 @login_required
 def home_ats_checker(request):
@@ -80,7 +74,6 @@ def home_ats_checker(request):
         path = default_storage.save('temp/' + uploaded_file.name, uploaded_file)
         raw_text = extract_text_from_pdf(default_storage.path(path))
         
-        # Unpack match score and missing skills list
         score, missing_skills = calculate_match_score(raw_text, jd_text)
         
         default_storage.delete(path)
@@ -93,14 +86,20 @@ def home_ats_checker(request):
     return render(request, 'screening/home.html')
 
 
-# screening/views.py
+from django.shortcuts import render, redirect
+from django.core.exceptions import ObjectDoesNotExist
 
 @login_required
 def room_detail(request, slug):
     """Separates Recruiter (View applicants) from Candidate (Apply)."""
-    room = get_object_or_404(RecruiterRoom, slug=slug)
     
-    # 1. Handle Recruiters: Show them the applicant list
+    try:
+        room = RecruiterRoom.objects.get(slug=slug)
+    except RecruiterRoom.DoesNotExist:
+        return render(request, 'screening/room_not_found.html', {
+            'attempted_code': slug
+        })
+    
     if request.user.profile.role == 'RECRUITER':
         submissions = room.submissions.all().order_by('-score')
         return render(request, 'screening/room_admin.html', {
@@ -108,7 +107,6 @@ def room_detail(request, slug):
             'submissions': submissions
         })
 
-    # 2. Handle Candidates: Show the Apply form
     if room.expires_at and timezone.now() > room.expires_at:
         return render(request, 'screening/room_closed.html', {'room': room})
 
@@ -135,7 +133,6 @@ def room_detail(request, slug):
             'missing_skills': missing_skills_list
         })
         
-    # This is the "Apply" page for candidates
     return render(request, 'screening/room_detail.html', {'room': room})
 
 @login_required

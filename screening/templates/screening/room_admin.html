@@ -1,109 +1,149 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container py-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none">Dashboard</a></li>
-            <li class="breadcrumb-item active">{{ room.name }}</li>
-        </ol>
-    </nav>
-
-    <form action="{% url 'export_to_excel' %}" method="post" id="exportForm">
+    <form action="{% url 'export_to_excel' %}" method="post">
         {% csrf_token %}
-        
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-5">
             <div>
-                <h2 class="fw-bold mb-0">{{ room.name }}</h2>
-                <p class="text-muted">Room Code: <code class="text-primary">{{ room.slug }}</code></p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb x-small mb-1">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none text-muted">Dashboard</a></li>
+                        <li class="breadcrumb-item active">{{ room.name }}</li>
+                    </ol>
+                </nav>
+                <h2 class="fw-bold text-slate-900 mb-0">{{ room.name }}</h2>
+                
+                <div class="d-flex align-items-center mt-2">
+                    <p class="text-muted small mb-0">Room Code: </p>
+                    <code id="room-slug-text" class="text-primary fw-bold mx-2 bg-light px-2 py-1 rounded small">{{ room.slug }}</code>
+                    <button type="button" class="btn btn-sm btn-light border shadow-sm rounded-circle d-flex align-items-center justify-content-center" 
+                            onclick="copyToClipboard('{{ room.slug }}', this)" 
+                            style="width: 32px; height: 32px;" title="Copy Code">
+                        <i class="bi bi-clipboard small"></i>
+                    </button>
+                </div>
             </div>
-            <button type="submit" class="btn btn-outline-success fw-bold px-4 shadow-sm">
-                <i class="bi bi-file-earmark-excel me-2"></i>Export Selected to Excel
+            
+            <button type="submit" class="btn btn-outline-success fw-bold px-4 rounded-3 shadow-sm">
+                <i class="bi bi-file-earmark-excel-fill me-2"></i>Export Selected
             </button>
         </div>
 
-        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr class="text-uppercase small fw-bold text-muted">
-                            <th class="ps-4">
-                                <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleAll(this)">
-                            </th>
-                            <th>Rank</th>
-                            <th>Candidate Name</th>
-                            <th>ATS Score</th>
-                            <th>Top Skills Identified</th>
-                            <th class="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for sub in submissions %}
-                        <tr>
-                            <td class="ps-4">
-                                <input type="checkbox" name="selected_ids" value="{{ sub.id }}" class="form-check-input candidate-checkbox">
-                            </td>
-                            <td class="fw-bold text-primary">#{{ forloop.counter }}</td>
-                            <td>
-                                <div class="fw-bold">{{ sub.candidate.username }}</div>
-                                <small class="text-muted">{{ sub.candidate.email }}</small>
-                            </td>
-                            <td>
-                                <div class="badge rounded-pill {% if sub.score >= 70 %}bg-success{% elif sub.score >= 40 %}bg-warning{% else %}bg-danger{% endif %} px-3 py-2">
+        <div class="d-flex align-items-center mb-3 px-3">
+            <input type="checkbox" class="form-check-input me-2 shadow-sm" id="selectAll" onclick="toggleAll(this)">
+            <label for="selectAll" class="text-muted small fw-bold text-uppercase">Select All Candidates</label>
+        </div>
+
+        <div class="row g-3">
+            {% for sub in submissions %}
+            <div class="col-12">
+                <div class="card border-0 shadow-sm transition-hover" style="border-radius: 20px;">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <input type="checkbox" name="selected_ids" value="{{ sub.id }}" class="form-check-input candidate-checkbox me-3">
+                                <span class="fw-bold text-primary fs-5">#{{ forloop.counter }}</span>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="fw-bold text-slate-900 fs-5">{{ sub.candidate.username }}</div>
+                                <div class="text-muted x-small">Submitted: {{ sub.submission_date|date:"M d, Y" }}</div>
+                            </div>
+
+                            <div class="col-md-2 text-center">
+                                <div class="text-muted x-small text-uppercase fw-bold mb-1">AI Match</div>
+                                <div class="badge rounded-pill {% if sub.score >= 70 %}bg-success{% elif sub.score >= 40 %}bg-warning{% else %}bg-danger{% endif %} px-3 py-2 fs-6">
                                     {{ sub.score }}%
                                 </div>
-                            </td>
-                            <td>
-                                <div class="skill-container">
-                                    <p class="mb-1 small text-truncate" style="max-width: 200px;" id="skill-text-{{ sub.id }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="text-muted x-small text-uppercase fw-bold mb-1">Top Skills</div>
+                                <div class="skill-content">
+                                    <p class="small mb-0 text-muted text-truncate" id="text-{{ sub.id }}">
                                         {{ sub.skills }}
                                     </p>
-                                    <button class="btn btn-sm p-0 text-primary small fw-bold" type="button" onclick="toggleSkills({{ sub.id }})" id="btn-{{ sub.id }}">
-                                        + Show All
-                                    </button>
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-primary text-decoration-none fw-bold" 
+                                            onclick="toggleCardSkills({{ sub.id }}, this)">+ Show All</button>
                                 </div>
-                            </td>
-                            <td class="text-end pe-4">
-                                <a href="{{ sub.resume_file.url }}" target="_blank" class="btn btn-sm btn-outline-dark me-1">
-                                    <i class="bi bi-file-pdf"></i> View PDF
-                                </a>
-                                <a href="{% url 'compare_skills' sub.id %}" class="btn btn-sm btn-primary">Analyze Gap</a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <p class="text-muted mt-3">No candidates have applied to this room yet.</p>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            </div>
+
+                            <div class="col text-end">
+                                <div class="d-flex flex-column gap-2 align-items-end">
+                                    <a href="{{ sub.resume_file.url }}" target="_blank" class="btn btn-sm btn-outline-dark px-3 rounded-pill w-100 max-w-150">
+                                        View PDF
+                                    </a>
+                                    <a href="{% url 'compare_skills' sub.id %}" class="btn btn-sm btn-primary px-3 rounded-pill w-100 max-w-150" 
+                                       style="background: #1E3A8A; border: none;">
+                                        Analyze Gap
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+            {% endfor %}
         </div>
     </form>
 </div>
 
-<script>
-// Logic to select or deselect all candidates at once
-function toggleAll(master) {
-    const checkboxes = document.getElementsByClassName('candidate-checkbox');
-    for (let i = 0; i < checkboxes.length; i++) {
-        checkboxes[i].checked = master.checked;
+<style>
+    .text-slate-900 { color: #0f172a; }
+    .x-small { font-size: 0.75rem; }
+    .max-w-150 { max-width: 150px; }
+    
+    .text-truncate {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-}
+    .text-expanded {
+        white-space: normal !important;
+        overflow: visible !important;
+    }
 
-function toggleSkills(id) {
-    const text = document.getElementById(`skill-text-${id}`);
-    const btn = document.getElementById(`btn-${id}`);
-    if (text.style.maxWidth === "200px" || text.style.maxWidth === "") {
-        text.style.maxWidth = "none";
-        text.classList.remove('text-truncate');
-        btn.innerText = "- Hide";
-    } else {
-        text.style.maxWidth = "200px";
-        text.classList.add('text-truncate');
-        btn.innerText = "+ Show All";
+    .transition-hover {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-}
+    .transition-hover:hover {
+        transform: translateX(5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .form-check-input:checked {
+        background-color: #1E3A8A;
+        border-color: #1E3A8A;
+    }
+</style>
+
+<script>
+    function copyToClipboard(text, btnElement) {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalIcon = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="bi bi-check2 text-success"></i>';
+            btnElement.classList.add('border-success');
+            
+            setTimeout(() => {
+                btnElement.innerHTML = originalIcon;
+                btnElement.classList.remove('border-success');
+            }, 2000);
+        });
+    }
+
+    function toggleCardSkills(id, btn) {
+        const text = document.getElementById(`text-${id}`);
+        text.classList.toggle('text-truncate');
+        text.classList.toggle('text-expanded');
+        btn.innerText = text.classList.contains('text-expanded') ? "- Hide" : "+ Show All";
+    }
+
+    function toggleAll(master) {
+        const checkboxes = document.getElementsByClassName('candidate-checkbox');
+        for (let i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = master.checked;
+        }
+    }
 </script>
 {% endblock %}

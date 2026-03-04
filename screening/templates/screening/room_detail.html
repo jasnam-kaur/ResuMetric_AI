@@ -1,39 +1,118 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 text-center">
-            <h2 class="fw-bold mb-1">Apply for {{ room.name }}</h2>
-            <p class="text-muted mb-4">Room Code: <code>{{ room.slug }}</code></p>
+<div class="container-fluid py-4 min-vh-100 d-flex align-items-center justify-content-center">
+    <div class="container">
+        <div class="row g-4 align-items-stretch justify-content-center">
+            
+            <div class="col-lg-5">
+                <div class="flip-card-container">
+                    <div class="flip-card-inner" id="flipInner">
+                        
+                        <div class="flip-card-front d-flex flex-column justify-content-center p-5 shadow-lg">
+                            <span class="badge rounded-pill bg-white bg-opacity-25 px-3 py-2 mb-3 fw-bold align-self-center">HIRING PORTAL</span>
+                            <h1 class="display-5 fw-bold mb-2 text-white">{{ room.name }}</h1>
+                            <p class="text-white-50 mb-5">Room Code: <code class="text-white fw-bold">{{ room.slug }}</code></p>
+                            
+                            <div class="mt-4">
+                                <button class="btn btn-glass w-100 py-3 rounded-4 fw-bold" onclick="flipCard()">
+                                    <i class="bi bi-arrow-repeat me-2"></i> Reveal Job Requirements
+                                </button>
+                            </div>
+                        </div>
 
-            <div class="card border-0 shadow-sm mb-4 text-start">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="fw-bold mb-0">Job Description</h5>
-                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#jdCollapse">
-                            View Requirements
-                        </button>
-                    </div>
-                    <div class="collapse mt-3" id="jdCollapse">
-                        <div class="p-3 bg-light rounded border small text-muted" style="white-space: pre-wrap;">
-                            {{ room.jd_text }} </div>
+                        <div class="flip-card-back d-flex flex-column p-5 shadow-lg">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <h4 class="fw-bold text-white mb-0"><i class="bi bi-info-circle-fill me-2"></i>Role Details</h4>
+                                <button class="btn btn-sm btn-glass px-2 py-1" onclick="flipCard()"><i class="bi bi-x-lg"></i></button>
+                            </div>
+                            <div class="jd-scroll-area flex-grow-1 p-3 bg-white bg-opacity-10 rounded-4 small text-white border-0">
+                                {{ room.jd_text }}
+                            </div>
+                            <p class="text-white-50 small mt-3 text-center">Click close to return to the application portal.</p>
+                        </div>
+
                     </div>
                 </div>
             </div>
 
-            <div class="card shadow border-0 p-4">
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="mb-4 text-start">
-                        <label class="form-label fw-bold">Upload Your Resume (PDF)</label>
-                        <input type="file" name="resume" class="form-control" accept=".pdf" required>
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-lg bg-white" style="border-radius: 30px;">
+                    <div class="card-body p-5 d-flex flex-column justify-content-center text-center">
+                        <div class="mb-4">
+                            <h2 class="fw-bold text-slate-900">Ready to Apply?</h2>
+                            <p class="text-muted small">Submit your professional PDF resume for instant AI analysis.</p>
+                        </div>
+
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="upload-area p-5 mb-4 rounded-4" style="border: 2px dashed #cbd5e1; background: #f8fafc;">
+                                <i class="bi bi-cloud-arrow-up-fill display-3 text-primary mb-3"></i>
+                                <h6 class="fw-bold mb-1">Select Resume File</h6>
+                                <input type="file" name="resume" class="form-control mt-3 mx-auto w-75 rounded-3" accept=".pdf" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded-4 shadow-sm fw-bold border-0" 
+                                    style="background: #1E3A8A;">
+                                Submit Application <i class="bi bi-send-fill ms-2"></i>
+                            </button>
+                        </form>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" style="background-color: #3b71fe; border: none;">
-                        Submit Application
-                    </button>
-                </form>
+                </div>
             </div>
+
         </div>
     </div>
 </div>
+
+<style>
+    /* 🛠️ Fix: Allow scrolling if content is larger than screen */
+    body { overflow-y: auto !important; }
+
+    /* 🔄 3D Flip Card Core Logic */
+    .flip-card-container {
+        perspective: 1000px;
+        height: 100%;
+        min-height: 500px;
+    }
+    .flip-card-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+    }
+    .flip-card-inner.flipped { transform: rotateY(180deg); }
+
+    .flip-card-front, .flip-card-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #1E3A8A 0%, #4F46E5 100%);
+    }
+    .flip-card-back { transform: rotateY(180deg); }
+
+    .jd-scroll-area {
+        overflow-y: auto;
+        white-space: pre-wrap;
+        line-height: 1.6;
+        max-height: 350px;
+    }
+
+    /* Aesthetic Elements */
+    .btn-glass {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+    .btn-glass:hover { background: rgba(255, 255, 255, 0.2); }
+</style>
+
+<script>
+function flipCard() {
+    document.getElementById('flipInner').classList.toggle('flipped');
+}
+</script>
 {% endblock %}

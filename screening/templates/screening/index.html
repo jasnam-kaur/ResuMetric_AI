@@ -1,55 +1,101 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container text-center py-5">
-    <h1 class="display-4 fw-bold mb-3">Welcome to ResuMetric AI</h1>
-    
-    {% if not user.is_authenticated %}
-        <p class="text-muted mb-5">Select your portal to continue</p>
-    {% else %}
-        <p class="text-muted mb-5">
-            Logged in as <strong>{{ user.username }}</strong> 
-            {% if user.profile %}({{ user.profile.get_role_display }}){% endif %}
-        </p>
-    {% endif %}
-
-    <div class="row g-4 justify-content-center">
+<div class="container-fluid p-0 overflow-hidden" style="height: calc(100vh - 70px); position: relative;">
+    <div class="row g-0 h-100">
         
-        {% if not user.is_authenticated or user.profile.role == 'CANDIDATE' %}
-        <div class="col-md-5">
-            <div class="card h-100 shadow border-0 border-top border-primary border-4">
-                <div class="card-body d-flex flex-column p-4">
-                    <h3 class="fw-bold">Candidate Portal</h3>
-                    <p class="text-muted">Optimize your resume with our AI or enter a hiring room.</p>
-                    <div class="mt-auto">
-                        {% if not user.is_authenticated %}
-                            <a href="{% url 'login' %}" class="btn btn-primary btn-lg w-100 mb-3" style="background-color: #3b71fe; border: none;">Candidate Login</a>
-                        {% else %}
-                            <a href="{% url 'home_ats_checker' %}" class="btn btn-primary btn-lg w-100 mb-3" style="background-color: #3b71fe; border: none;">Open My ATS Checker</a>
-                        {% endif %}
-                    </div>
+        <div class="col-lg-6 d-flex align-items-center justify-content-center bg-white position-relative overflow-hidden">
+            <div class="p-5 text-center z-index-10 animate__animated animate__fadeInLeft">
+                <div class="mb-4 bg-primary bg-opacity-10 d-inline-flex p-4 rounded-circle shadow-sm">
+                    <i class="bi bi-person-bounding-box text-primary display-4"></i>
                 </div>
+                <h2 class="display-4 fw-bold text-dark mb-3 ls-tight">Candidate Portal</h2>
+                <p class="text-muted mb-5 mx-auto max-w-400">
+                    Unlock your career potential. Use our advanced NLP to optimize your profile.
+                </p>
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold transition-grow">
+                    Login as Candidate
+                </a>
             </div>
+            <div class="diagonal-divider d-none d-lg-block"></div>
         </div>
-        {% endif %}
 
-        {% if not user.is_authenticated or user.profile.role == 'RECRUITER' or user.is_staff %}
-        <div class="col-md-5">
-            <div class="card h-100 shadow border-0 border-top border-dark border-4">
-                <div class="card-body d-flex flex-column p-4">
-                    <h3 class="fw-bold">Recruiter Portal</h3>
-                    <p class="text-muted">Manage your job rooms and view applicant rankings.</p>
-                    <div class="mt-auto">
-                        {% if not user.is_authenticated %}
-                            <a href="{% url 'login' %}" class="btn btn-dark btn-lg w-100 mb-3">Recruiter Login</a>
-                        {% else %}
-                            <a href="{% url 'dashboard' %}" class="btn btn-success btn-lg w-100">Go to Dashboard</a>
-                        {% endif %}
-                    </div>
+        <div class="col-lg-6 d-flex align-items-center justify-content-center text-white portal-dark-side">
+            <div class="p-5 text-center z-index-10 animate__animated animate__fadeInRight">
+                <div class="mb-4 bg-white bg-opacity-10 d-inline-flex p-4 rounded-circle shadow-sm border border-white border-opacity-10">
+                    <i class="bi bi-briefcase-fill text-white display-4"></i>
                 </div>
+                <h2 class="display-4 fw-bold mb-3 ls-tight">Recruiter Portal</h2>
+                <p class="text-white-50 mb-5 mx-auto max-w-400">
+                    Scale your hiring. Manage rooms and leverage vector-based applicant ranking.
+                </p>
+                <a href="{% url 'login' %}" class="btn btn-light btn-lg rounded-pill px-5 py-3 fw-bold transition-grow text-dark">
+                    Login as Recruiter
+                </a>
             </div>
         </div>
-        {% endif %}
 
     </div>
+
+    <div class="central-logo-bridge d-none d-lg-flex">
+        <div class="logo-orb shadow-2xl">
+            <i class="bi bi-cpu-fill fs-2 text-primary"></i>
+        </div>
+        <div class="badge bg-dark text-white rounded-pill px-3 py-2 mt-2 border border-white border-opacity-20 shadow-sm x-small">
+            NEXT GEN AI
+        </div>
+    </div>
 </div>
+
+<style>
+    .portal-dark-side {
+        background: linear-gradient(165deg, #1e3a8a 0%, #0f172a 100%);
+        position: relative;
+    }
+
+    .diagonal-divider {
+        position: absolute;
+        top: 0;
+        right: -80px;
+        width: 160px;
+        height: 100%;
+        background: #ffffff;
+        transform: skewX(-8deg);
+        z-index: 5;
+        box-shadow: 15px 0 30px rgba(0,0,0,0.05);
+    }
+
+    .central-logo-bridge {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 20;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .logo-orb {
+        background: white;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 4px solid #f8fafc;
+    }
+
+    .ls-tight { letter-spacing: -2px; line-height: 1; }
+    .max-w-400 { max-width: 400px; }
+    .z-index-10 { position: relative; z-index: 10; }
+    .x-small { font-size: 0.65rem; font-weight: 800; letter-spacing: 1px; }
+
+    .transition-grow { transition: all 0.3s ease; }
+    .transition-grow:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 15px 30px rgba(0,0,0,0.15); }
+
+    @media (max-width: 991px) {
+        .container-fluid { height: auto !important; overflow-y: auto !important; }
+        .col-lg-6 { padding: 100px 20px !important; }
+    }
+</style>
 {% endblock %}

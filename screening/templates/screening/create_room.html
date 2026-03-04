@@ -1,33 +1,88 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow border-0 p-4">
-                <h2 class="fw-bold mb-4">Create Hiring Room</h2>
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Job Title / Room Name</label>
-                        <input type="text" name="name" class="form-control" placeholder="e.g. Senior Java Developer"
-                            required>
+<div class="row min-vh-100 align-items-center justify-content-center py-4">
+    <div class="col-lg-11 col-xl-9">
+        <div class="card overflow-hidden border-0 shadow-lg" style="border-radius: 30px;">
+            <div class="row g-0">
+                <div class="col-md-5 d-none d-md-flex flex-column justify-content-center p-5 text-white" 
+                     style="background: linear-gradient(135deg, #1E3A8A 0%, #0f172a 100%);">
+                    <div class="mb-4">
+                        <span class="badge rounded-pill bg-white bg-opacity-25 px-3 py-2 mb-3 fw-bold small">HR CONSOLE v2.0</span>
+                        <h2 class="display-6 fw-bold mb-3">Initialize Your Hiring Room</h2>
+                        <p class="text-white-50 small mb-4">Our AI will utilize your provided JD to rank candidates with high-precision NLP matching.</p>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Job Description</label>
-                        <textarea name="jd_text" class="form-control" rows="10" placeholder="Paste the JD here..."
-                            required></textarea>
+                    <div class="mt-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-white bg-opacity-10 rounded-circle p-2 me-3"><i class="bi bi-clock"></i></div>
+                            <span class="small fw-medium">Optional Expiry Timers</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-white bg-opacity-10 rounded-circle p-2 me-3"><i class="bi bi-shield-check"></i></div>
+                            <span class="small fw-medium">Encrypted Data Processing</span>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Room Expiry (Optional Timer)</label>
-                        <input type="datetime-local" name="expires_at" class="form-control">
-                        <small class="text-muted">Candidates won't be able to apply after this time.</small>
+                </div>
+
+                <div class="col-md-7 bg-white p-4 p-lg-5">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold text-slate-900 mb-1">Room Setup</h3>
+                        <p class="text-muted small">Configure your recruitment requirements</p>
                     </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-success btn-lg">Create Room</button>
-                    </div>
-                </form>
+
+                    <form method="POST" class="needs-validation">
+                        {% csrf_token %}
+                        
+                        <div class="form-floating mb-3">
+                            <input type="text" name="name" class="form-control bg-light border-0 shadow-none" 
+                                   id="id_name" placeholder="Job Title" required>
+                            <label for="id_name"><i class="bi bi-briefcase me-2"></i>Job Title / Room Name</label>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary x-small text-uppercase mb-1">
+                                <i class="bi bi-file-earmark-text me-1"></i>Detailed Job Description
+                            </label>
+                            <textarea name="jd_text" class="form-control bg-light border-0 shadow-none p-3" 
+                                      id="id_jd" rows="5" placeholder="Paste JD here..." 
+                                      style="border-radius: 12px; resize: none; font-size: 0.9rem;" required></textarea>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="datetime-local" name="expires_at" class="form-control bg-light border-0 shadow-none" 
+                                   id="id_expires" placeholder="Expiry">
+                            <label for="id_expires">Room Expiry (Optional)</label>
+                            <div class="form-text x-small text-muted mt-1 px-1">
+                                Leave blank for a permanent room.
+                            </div>
+                        </div>
+
+                        <div class="d-grid pt-2">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 rounded-4 shadow-sm fw-bold border-0" 
+                                    style="background: #1E3A8A;">
+                                <i class="bi bi-plus-circle me-2"></i>Create Room
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <a href="{% url 'dashboard' %}" class="text-decoration-none small text-muted">&larr; Return to Dashboard</a>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .form-floating > .form-control { height: 60px; border-radius: 12px; }
+    .x-small { font-size: 0.7rem; }
+    .text-slate-900 { color: #0f172a; }
+    
+    #id_jd { max-height: 180px; }
+    
+    .btn-primary:hover {
+        background-color: #0f172a !important;
+        transform: translateY(-2px);
+    }
+</style>
 {% endblock %}

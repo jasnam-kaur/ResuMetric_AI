@@ -1,13 +1,11 @@
-import fitz  # Standard for PyMuPDF
+import fitz  
 import re
 import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load spaCy for Lemmatization [cite: 1]
 nlp = spacy.load("en_core_web_sm")
 
-# --- 1. Synonym Mapping ---
 # Maps technical terms to broader categories to ensure high-accuracy matching.
 SYNONYM_MAP = {
     'django': ['web framework', 'python backend', 'mvc'],
@@ -79,19 +77,16 @@ def calculate_match_score(resume_text, jd_text):
     
     final_score = (base_similarity * 0.6) + (skill_match_ratio * 100 * 0.4)
     
-    # Return both the score and the sorted list of missing items [cite: 1]
     return round(min(final_score, 100.0), 2), sorted(missing_skills)
 
 def extract_skills(text):
     """Matches text against the Global Skill DB using lemmatization and synonyms."""
     text_lower = text.lower()
     
-    # Pre-clean the text for matching 
     processed_text = text_lower.replace('(', ' ').replace(')', ' ')
     doc = nlp(processed_text)
     lemmatized_text = " ".join([token.lemma_ for token in doc if not token.is_stop and token.is_alpha])
     
-    # The Global Skill DB [cite: 1]
     SKILL_DB = [
         # --- IT, CLOUD & DEVOPS ---
         'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'Jenkins', 'Terraform', 'Ansible', 'Puppet', 
@@ -152,13 +147,11 @@ def extract_skills(text):
     
     for skill in SKILL_DB:
         skill_lower = skill.lower()
-        # Direct word matching [cite: 1]
         pattern = r'\b' + re.escape(skill_lower) + r'\b'
         
         if re.search(pattern, lemmatized_text):
             found_skills.add(skill)
         elif skill_lower in SYNONYM_MAP:
-            # Check for synonyms if direct match fails [cite: 1]
             for synonym in SYNONYM_MAP[skill_lower]:
                 syn_pattern = r'\b' + re.escape(synonym) + r'\b'
                 if re.search(syn_pattern, lemmatized_text):

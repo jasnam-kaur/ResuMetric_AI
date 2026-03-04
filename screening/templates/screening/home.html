@@ -1,77 +1,72 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 mb-5">
-            <div class="card shadow border-0 p-4">
-                <div class="text-center mb-4">
-                    <h2 class="fw-bold">Instant ATS Score Checker</h2>
-                    <p class="text-muted">Optimize your resume against any job description</p>
+<div class="container py-4 animate__animated animate__fadeIn">
+    <div class="text-center mb-4">
+        <span class="badge rounded-pill bg-primary-subtle text-primary px-3 py-2 mb-2 fw-bold">v2.0 AI POWERED</span>
+        <h1 class="display-5 fw-bold text-slate-900">Career <span class="text-primary">Optimization</span></h1>
+        <p class="text-muted small mx-auto" style="max-width: 500px;">Analyze your resume match or join a recruiter's hiring room.</p>
+    </div>
+
+    <div class="row justify-content-center g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-lg border-0 h-100" style="border-radius: 24px;">
+                <div class="card-body p-4 p-md-5">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary text-white rounded-3 p-2 me-3" style="background: linear-gradient(135deg, #1E3A8A, #4F46E5) !important;">
+                            <i class="bi bi-cpu-fill"></i>
+                        </div>
+                        <h4 class="fw-bold mb-0">Instant ATS Analyzer</h4>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Job Description</label>
+                            <textarea name="jd_text" class="form-control bg-light border-0" rows="4" 
+                                      placeholder="Paste requirements here..." style="border-radius: 12px; resize: none;" required></textarea>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Your Resume (PDF)</label>
+                            <input type="file" name="resume" class="form-control bg-light border-0 rounded-3 py-2" accept=".pdf" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 py-3 rounded-4 fw-bold border-0 shadow-sm" 
+                                style="background: #1e3a8a;">
+                            Analyze My Match
+                        </button>
+                    </form>
                 </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            {% if score is not None %}
+            <div class="card border-0 shadow-lg mb-4 text-center p-4" style="border-radius: 24px; background: #fff;">
+                <h6 class="text-uppercase text-muted small fw-bold">Match Score</h6>
+                <div class="display-3 fw-bold" style="color: #4F46E5;">{{ score }}%</div>
                 
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="mb-3 text-start">
-                        <label class="form-label fw-bold">Target Job Description</label>
-                        <textarea name="jd_text" class="form-control" rows="5" placeholder="Paste the Job Description here..." required></textarea>
-                    </div>
-                    <div class="mb-4 text-start">
-                        <label class="form-label fw-bold">Upload Your Resume (PDF)</label>
-                        <input type="file" name="resume" class="form-control" accept=".pdf" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3 shadow-sm" style="background-color: #3b71fe; border: none;">Analyze My Resume</button>
-                </form>
-
-                {% if score is not None %}
-                <div class="mt-5 p-4 bg-light rounded text-center border shadow-sm">
-                    <h4 class="text-muted small text-uppercase fw-bold mb-2">Your Match Score</h4>
-                    <div class="display-1 fw-bold text-primary">{{ score }}%</div>
-                </div>
-
-                <div class="card border-0 bg-white shadow-sm rounded-4 mt-4">
-                    <div class="card-body p-4 text-start">
-                        <h5 class="fw-bold mb-3">
-                            <i class="bi bi-lightbulb-fill text-warning me-2"></i>How to Improve Your Score
-                        </h5>
-                        
-                        {% if missing_skills %}
-                            <p class="text-muted small">The following key skills were found in the JD but are <strong>missing</strong> from your resume:</p>
-                            <div class="d-flex flex-wrap gap-2 mb-3">
-                                {% for skill in missing_skills %}
-                                    <span class="badge rounded-pill bg-light text-danger border border-danger-subtle px-3 py-2">
-                                        + {{ skill }}
-                                    </span>
-                                {% endfor %}
-                            </div>
-                            <div class="alert alert-info border-0 small mb-0">
-                                <i class="bi bi-info-circle-fill me-2"></i>
-                                <strong>Pro Tip:</strong> Mentioning these technical keywords naturally in your "Skills" section can significantly improve your ATS ranking.
-                            </div>
-                        {% else %}
-                            <div class="alert alert-success border-0 small mb-0">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                <strong>Perfect Match!</strong> Your resume successfully covers all identified skills in this description.
-                            </div>
-                        {% endif %}
+                {% if missing_skills %}
+                <div class="mt-3 text-start">
+                    <p class="small fw-bold text-danger mb-2"><i class="bi bi-patch-exclamation me-1"></i> Add these keywords:</p>
+                    <div class="d-flex flex-wrap gap-1">
+                        {% for skill in missing_skills %}
+                        <span class="badge rounded-pill bg-danger-subtle text-danger border-0 small">+ {{ skill }}</span>
+                        {% endfor %}
                     </div>
                 </div>
                 {% endif %}
             </div>
-        </div>
+            {% endif %}
 
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0 bg-dark text-white p-4 rounded-4">
-                <div class="row align-items-center">
-                    <div class="col-md-7">
-                        <h4 class="mb-1">Apply via Room Code</h4>
-                        <p class="small text-secondary mb-0">Enter the code provided by your recruiter to apply for a specific role.</p>
-                    </div>
-                    <div class="col-md-5">
-                        <div class="input-group">
-                            <input type="text" id="roomCode" class="form-control border-0" placeholder="e.g. xelta-ai-01" style="border-radius: 8px 0 0 8px;">
-                            <button class="btn btn-primary px-4 fw-bold" onclick="goToRoom()" style="border-radius: 0 8px 8px 0;">Enter Room</button>
-                        </div>
-                    </div>
+            <div class="card border-0 shadow-lg text-white p-4" style="border-radius: 24px; background: #0f172a;">
+                <h5 class="fw-bold mb-2">Apply via Code</h5>
+                <p class="text-white-50 small mb-3">Submit your resume directly to a recruiter's room.</p>
+                <div class="input-group">
+                    <input type="text" id="roomCode" class="form-control border-0 bg-white bg-opacity-10 text-white" 
+                           placeholder="e.g. mbsl-01" style="border-radius: 10px 0 0 10px;">
+                    <button class="btn btn-primary px-3 fw-bold" onclick="goToRoom()" 
+                            style="border-radius: 0 10px 10px 0; background-color: #3b71fe;">Join</button>
                 </div>
             </div>
         </div>
@@ -90,9 +85,19 @@ function goToRoom() {
 </script>
 
 <style>
-    .display-1 { font-size: 5rem; letter-spacing: -2px; }
-    .badge { font-size: 0.85rem; }
-    .btn-primary { background-color: #3b71fe; transition: all 0.3s; }
-    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .bg-primary-subtle { background-color: #e0eaff !important; }
+    .text-primary { color: #3b71fe !important; }
+    .display-3 { letter-spacing: -2px; }
+    .badge { font-size: 0.75rem; }
+    .bg-danger-subtle { background-color: #fee2e2 !important; }
+
+    #roomCode::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important; 
+        opacity: 1; 
+    }
+
+    #roomCode {
+        color: #ffffff !important;
+    }
 </style>
 {% endblock %}

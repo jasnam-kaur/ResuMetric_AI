@@ -2,96 +2,95 @@
 {% block content %}
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-5">
-            <div class="card shadow border-0 rounded-4 overflow-hidden">
-                <div class="card-header bg-dark text-white text-center py-4">
-                    <h2 class="h4 fw-bold mb-0">Join ResuMetric AI</h2>
-                    <p class="small mb-0 mt-2 text-secondary">Create your account to get started</p>
+<div class="row min-vh-100 align-items-center justify-content-center py-4">
+    <div class="col-lg-11 col-xl-9">
+        <div class="card overflow-hidden border-0 shadow-lg" style="border-radius: 30px;">
+            <div class="row g-0">
+                <div class="col-md-5 d-none d-md-flex flex-column justify-content-center p-5 text-white" 
+                     style="background: linear-gradient(135deg, #1E3A8A 0%, #4F46E5 100%);">
+                    <div class="mb-4">
+                        <span class="badge rounded-pill bg-white bg-opacity-25 px-3 py-2 mb-3">v2.0 AI Powered</span>
+                        <h2 class="display-6 fw-bold mb-3">The Future of Hiring is Here.</h2>
+                        <p class="text-white-50 small mb-4">Experience precision-driven resume analysis and streamlined recruitment workflows.</p>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-white bg-opacity-10 rounded-circle p-2 me-3"><i class="bi bi-shield-check"></i></div>
+                            <span class="small fw-medium">Secure HR Data Handling</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-white bg-opacity-10 rounded-circle p-2 me-3"><i class="bi bi-cpu"></i></div>
+                            <span class="small fw-medium">NLP-Powered Skill Matching</span>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="card-body p-4 p-md-5">
+                <div class="col-md-7 bg-white p-4 p-lg-5">
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold text-slate-900 mb-1">Create Account</h3>
+                        <p class="text-muted small">Enter your details to access the portal</p>
+                    </div>
+
                     {% if form.errors %}
-                    <div class="alert alert-danger py-2 small border-0 shadow-sm mb-4">
-                        <i class="bi bi-exclamation-circle-fill me-2"></i> Please correct the errors below.
+                    <div class="alert alert-danger py-2 small border-0 shadow-sm mb-3">
+                        <i class="bi bi-exclamation-circle-fill me-2"></i> Correct the errors below.
                     </div>
                     {% endif %}
 
                     <form method="post" id="signupForm">
                         {% csrf_token %}
 
-                        <div class="mb-4 bg-light p-3 rounded-3 border">
-                            <label for="id_role" class="form-label fw-bold small text-muted text-uppercase">I am
-                                a:</label>
-                            {{ form.role }}
-                            {% if form.role.errors %}
-                            <div class="text-danger x-small mt-1">{{ form.role.errors.0 }}</div>
-                            {% endif %}
-                        </div>
-
                         <div class="mb-3">
-                            <label for="id_username"
-                                class="form-label fw-bold small text-muted text-uppercase">Username</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0"><i
-                                        class="bi bi-person text-primary"></i></span>
-                                <input type="text" name="username" class="form-control border-start-0 py-2"
-                                    id="id_username" placeholder="Choose a username" required>
+                            <div class="form-floating">
+                                {{ form.role }}
+                                <label for="role_selection" class="text-primary fw-bold">I AM A:</label>
                             </div>
-                            {% if form.username.errors %}
-                            <div class="text-danger x-small mt-1">{{ form.username.errors.0 }}</div>
-                            {% endif %}
                         </div>
 
-                        {% for field in form %}
-                        {% if field.name != 'username' and field.name != 'role' %}
-                        <div class="mb-3">
-                            <label for="{{ field.id_for_label }}"
-                                class="form-label fw-bold small text-muted text-uppercase">{{ field.label }}</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white border-end-0"><i
-                                        class="bi bi-shield-lock text-primary"></i></span>
-                                <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}"
-                                    class="form-control border-start-0 border-end-0 py-2 password-field"
-                                    id="{{ field.id_for_label }}" placeholder="Enter {{ field.label|lower }}" required>
-
-                                <button class="btn btn-outline-secondary border-start-0 bg-white toggle-password"
-                                    type="button" style="border-color: #ced4da;">
-                                    <span class="material-icons eye-icon"
-                                        style="color: #000000 !important; vertical-align: middle; font-size: 20px;">
-                                        visibility
-                                    </span>
-                                </button>
-                            </div>
-                            {% if field.help_text %}
-                            <div class="form-text x-small text-muted">{{ field.help_text|safe }}</div>
-                            {% endif %}
-                            {% if field.errors %}
-                            <div class="text-danger x-small mt-1">{{ field.errors.0 }}</div>
-                            {% endif %}
+                        <div class="form-floating mb-3">
+                            <input type="text" name="username" class="form-control bg-light border-0 shadow-none" 
+                                   id="id_username" placeholder="Username" required>
+                            <label for="id_username"><i class="bi bi-person me-2"></i>Choose a username</label>
                         </div>
-                        {% endif %}
-                        {% endfor %}
 
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg fw-bold py-3 shadow-sm"
-                                style="background-color: #3b71fe; border: none; border-radius: 10px;">
-                                Create My Account
+                        <div class="row g-2 mb-2">
+                            {% for field in form %}
+                                {% if field.name == 'password1' or field.name == 'password2' %}
+                                <div class="col-6">
+                                    <div class="input-group input-group-sm">
+                                        <div class="form-floating flex-grow-1">
+                                            <input type="password" name="{{ field.html_name }}" 
+                                                   class="form-control bg-light border-0 shadow-none password-field" 
+                                                   id="{{ field.id_for_label }}" placeholder="{{ field.label }}" required>
+                                            <label for="{{ field.id_for_label }}">{{ field.label|truncatechars:10 }}</label>
+                                        </div>
+                                        <button class="btn btn-light border-0 toggle-password" type="button">
+                                            <span class="material-icons eye-icon" style="font-size: 18px; vertical-align: middle;">visibility</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        <div class="mb-4">
+                            <p class="text-muted mb-0" style="font-size: 0.65rem;">
+                                <i class="bi bi-info-circle me-1"></i> Passwords must be 8+ characters and non-numeric.
+                            </p>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 rounded-4 shadow-sm mb-3">
+                                Get Started <i class="bi bi-arrow-right ms-2"></i>
                             </button>
                         </div>
-                    </form>
-                </div>
 
-                <div class="card-footer bg-white border-top-0 text-center pb-4">
-                    <p class="small text-muted mb-0">
-                        Already have an account?
-                        <a href="{% url 'login' %}" class="fw-bold text-decoration-none">Sign In</a>
-                    </p>
-                    <div class="mt-3">
-                        <a href="{% url 'landing' %}" class="text-decoration-none small text-muted">&larr; Back to
-                            Selection</a>
-                    </div>
+                        <div class="text-center">
+                            <p class="small text-muted">Already have an account? 
+                                <a href="{% url 'login' %}" class="fw-bold text-decoration-none text-primary">Sign In</a>
+                            </p>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -99,38 +98,26 @@
 </div>
 
 <style>
-    /* Focus and styling enhancements */
-    .form-control:focus,
-    .form-select:focus {
-        box-shadow: none;
-        border-color: #3b71fe;
-    }
-
-    .input-group:focus-within .input-group-text,
-    .input-group:focus-within .btn-outline-secondary {
-        border-color: #3b71fe;
-    }
-
-    .x-small {
-        font-size: 0.75rem;
-    }
-
-    .input-group-text {
-        border: 1px solid #ced4da;
-    }
-
-    .eye-icon {
-        color: #000000 !important;
+    .form-floating > .form-control { height: 55px; border-radius: 12px; }
+    .form-floating > label { font-size: 0.8rem; }
+    .input-group > .form-floating > .form-control { border-top-right-radius: 0; border-bottom-right-radius: 0; }
+    .input-group > .btn { border-top-right-radius: 12px; border-bottom-right-radius: 12px; background-color: #f8fafc; }
+    
+    #role_selection { 
+        padding-top: 1.625rem; 
+        background-color: #eef2ff !important; 
+        border-radius: 12px; 
+        border: none;
+        font-weight: 700;
+        color: #1E3A8A;
     }
 </style>
 
 <script>
-    // 1. Password Visibility Toggle
     document.querySelectorAll('.toggle-password').forEach(button => {
         button.addEventListener('click', function () {
             const passwordInput = this.closest('.input-group').querySelector('input');
             const icon = this.querySelector('.eye-icon');
-
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 icon.textContent = 'visibility_off';
@@ -141,12 +128,12 @@
         });
     });
 
-    // 2. Role Enforcement Script: Syncs the UI with the URL parameter
     window.addEventListener('load', function () {
         const urlParams = new URLSearchParams(window.location.search);
         const roleParam = urlParams.get('role');
         if (roleParam) {
-            document.getElementById('role_selection').value = roleParam.toUpperCase();
+            const roleSelect = document.getElementById('role_selection');
+            if(roleSelect) roleSelect.value = roleParam.toUpperCase();
         }
     });
 </script>

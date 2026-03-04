@@ -13,15 +13,12 @@ class ExtendedUserCreationForm(UserCreationForm):
     )
 
     def save(self, commit=True):
-        # 1. FIXED INDENTATION: Code must be inside the function
         user = super().save(commit=False)
         
-        # 2. Attach the role to the user object for the signal to see
         user._selected_role = self.cleaned_data.get('role')
         
         if commit:
             user.save()
-            # 3. Aggressively update to overwrite any signal defaults
             Profile.objects.update_or_create(
                 user=user,
                 defaults={'role': user._selected_role}

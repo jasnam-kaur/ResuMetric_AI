@@ -7,4 +7,3 @@ pandas==2.2.0
 dj-database-url==2.1.0
 openpyxl
 nltk
-# We install spacy separately in build.sh to ensure zero conflicts

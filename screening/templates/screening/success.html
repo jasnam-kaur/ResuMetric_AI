@@ -1,50 +1,47 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-5">
+<div class="container py-5 animate__animated animate__fadeIn">
     <div class="row justify-content-center">
-        <div class="col-md-7 text-center">
-            <div class="card shadow-lg border-0">
-                <div class="card-body p-5">
-                    <div class="mb-4">
-                        <div class="display-1 text-success">
-                            <i class="bi bi-check-circle-fill"></i>
-                        </div>
+        <div class="col-lg-7 col-xl-6">
+            <div class="card shadow-lg border-0 overflow-hidden" style="border-radius: 28px; background: #ffffff;">
+                
+                <div class="text-center pt-5 pb-5 px-4" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); position: relative; min-height: 220px;">
+                    <div class="header-icon-container shadow-lg">
+                        <i class="bi bi-check-lg text-success display-4"></i>
                     </div>
-
                     {% if room %}
-                    <h2 class="fw-bold text-dark">Application Submitted!</h2>
-                    <p class="text-muted mb-4">
-                        Thank you, <strong>{{ user.username }}</strong>. Your resume has been successfully uploaded to the
-                        <strong>{{ room.name }}</strong> recruitment portal.
-                    </p>
+                    <h2 class="text-white fw-bold mt-4 mb-1">Application Sent!</h2>
+                    <p class="text-white-50 mb-0 small">Successfully submitted to <strong>{{ room.name }}</strong></p>
                     {% else %}
-                    <h2 class="fw-bold text-dark">Analysis Complete!</h2>
-                    <p class="text-muted mb-4">Here is how your resume matches the provided Job Description.</p>
+                    <h2 class="text-white fw-bold mt-4 mb-1">Analysis Complete!</h2>
+                    <p class="text-white-50 mb-0 small">Resume match successfully calculated</p>
                     {% endif %}
+                </div>
 
-                    <hr class="my-4">
-
-                    <div class="bg-light p-4 rounded-3 mb-4">
-                        <h5 class="text-secondary text-uppercase small fw-bold mb-3">AI Match Score</h5>
-                        
-                        <div class="display-1 fw-bold text-primary">{{ score }}%</div>
-                        
-                        <div class="progress mt-3" style="height: 10px;">
-                            <div class="progress-bar bg-primary" role="progressbar" style="width: {{ score }}%"
-                                aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="card-body p-4 p-md-5 mt-3">
+                    <div class="text-center mb-5">
+                        <span class="text-muted small text-uppercase fw-bold ls-1">AI Match Confidence</span>
+                        <div class="d-flex align-items-center justify-content-center mt-2">
+                            <span class="display-1 fw-bold text-slate-900" style="letter-spacing: -2px;">{{ score }}</span>
+                            <span class="display-5 fw-bold text-primary ms-1">%</span>
                         </div>
-                        <p class="mt-3 small text-muted">
-                            Calculated using TF-IDF Vectorization and Cosine Similarity logic.
+                        
+                        <div class="progress mt-3 mx-auto" style="height: 10px; width: 85%; border-radius: 20px; background-color: #f1f5f9;">
+                            <div class="progress-bar bg-primary shadow-sm" role="progressbar" 
+                                 style="width: {{ score }}%; border-radius: 20px;"
+                                 aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <p class="x-small text-muted mt-3 italic">
+                            <i class="bi bi-cpu me-1"></i> NLP Logic: TF-IDF + Cosine Similarity
                         </p>
                     </div>
 
-                    {# Logic to show missing skills if they exist in the context #}
                     {% if missing_skills %}
-                    <div class="text-start mt-4">
-                        <h6 class="fw-bold text-danger mb-3">Missing Skills to Improve Your Score:</h6>
+                    <div class="bg-light rounded-4 p-4 border-0">
+                        <h6 class="fw-bold mb-3 text-slate-900">Opportunities to Improve</h6>
                         <div class="d-flex flex-wrap gap-2">
                             {% for skill in missing_skills %}
-                            <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-3 py-2">
+                            <span class="badge rounded-pill bg-white text-danger border border-danger-subtle px-3 py-2 small fw-bold shadow-sm">
                                 + {{ skill }}
                             </span>
                             {% endfor %}
@@ -52,12 +49,35 @@
                     </div>
                     {% endif %}
 
-                    <div class="d-grid gap-2 mt-5">
-                        <a href="{% url 'home_ats_checker' %}" class="btn btn-outline-secondary">Return to Home</a>
+                    <div class="mt-5">
+                        <a href="{% url 'home_ats_checker' %}" class="btn btn-outline-primary btn-lg w-100 py-3 rounded-4 fw-bold border-2 transition-hover">
+                            Return to Dashboard
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .header-icon-container {
+        position: absolute;
+        bottom: -35px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #ffffff;
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+    }
+    .ls-1 { letter-spacing: 1.5px; }
+    .text-slate-900 { color: #0f172a; }
+    .x-small { font-size: 0.72rem; }
+    .btn-outline-primary:hover { background-color: #3b71fe; color: #fff; transform: translateY(-3px); }
+</style>
 {% endblock %}

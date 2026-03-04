@@ -28,7 +28,6 @@ class ResumeSubmission(models.Model):
     candidate = models.ForeignKey(User, on_delete=models.CASCADE)
     resume_file = models.FileField(upload_to='submissions/')
     score = models.FloatField()
-    # ADD THIS LINE: To store extracted skills as a string
     skills = models.TextField(default="No skills identified") 
     submitted_at = models.DateTimeField(auto_now_add=True)
 

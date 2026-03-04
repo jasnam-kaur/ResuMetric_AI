@@ -1,66 +1,74 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card shadow border-0 rounded-4 overflow-hidden">
-                <div class="card-header bg-dark text-white text-center py-4">
-                    <h3 class="mb-0">ResuMetric AI Portal</h3>
-                    <p class="small mb-0 mt-2 text-secondary">Sign in to access your profile</p>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<div class="row min-vh-100 align-items-center justify-content-center py-4">
+    <div class="col-lg-10 col-xl-8">
+        <div class="card overflow-hidden border-0 shadow-lg" style="border-radius: 30px;">
+            <div class="row g-0">
+                <div class="col-md-5 d-none d-md-flex flex-column justify-content-center p-5 text-white" 
+                     style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);">
+                    <div class="mb-4 text-center">
+                        <div class="bg-white bg-opacity-10 rounded-circle d-inline-flex p-4 mb-3">
+                            <i class="bi bi-person-lock display-4"></i>
+                        </div>
+                        <h2 class="fw-bold">ResuMetric AI Portal</h2>
+                        <p class="text-white-50 small">Sign in to manage your recruitment lifecycle or optimize your career path.</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-top border-white border-opacity-10">
+                        <p class="small mb-0 text-white-50 text-center italic">"Precision in every profile."</p>
+                    </div>
                 </div>
-                <div class="card-body p-4">
+
+                <div class="col-md-7 bg-white p-4 p-lg-5">
+                    <div class="text-center mb-5">
+                        <h3 class="fw-bold text-slate-900 mb-1">Welcome Back</h3>
+                        <p class="text-muted small">Access your personalized AI dashboard</p>
+                    </div>
+
                     {% if form.errors %}
-                    <div class="alert alert-danger py-2 small border-0">
-                        Your username and password didn't match. Please try again.
+                    <div class="alert alert-danger py-2 small border-0 shadow-sm mb-4">
+                        <i class="bi bi-shield-exclamation me-2"></i> Invalid username or password.
                     </div>
                     {% endif %}
 
                     <form method="post" action="{% url 'login' %}">
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="id_username"
-                                class="form-label fw-bold small text-uppercase text-muted">Username</label>
-                            <input type="text" name="username" class="form-control py-2" id="id_username" required>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" name="username" class="form-control bg-light border-0 shadow-none" 
+                                   id="id_username" placeholder="Username" required autofocus>
+                            <label for="id_username"><i class="bi bi-person me-2"></i>Username</label>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="id_password"
-                                class="form-label fw-bold small text-uppercase text-muted">Password</label>
-                            <div class="input-group">
-                                <input type="password" name="password" class="form-control border-end-0 py-2"
-                                    id="id_password" required>
-                                <button class="btn btn-outline-secondary border-start-0 bg-white toggle-password"
-                                    type="button" id="togglePassword" style="border-color: #ced4da;">
-                                    <span class="material-icons" id="eyeIcon"
-                                        style="color: #000000 !important; vertical-align: middle; font-size: 20px;">
-                                        visibility
-                                    </span>
-                                </button>
+                        <div class="input-group mb-4">
+                            <div class="form-floating flex-grow-1">
+                                <input type="password" name="password" class="form-control bg-light border-0 shadow-none" 
+                                       id="id_password" placeholder="Password" required>
+                                <label for="id_password"><i class="bi bi-key me-2"></i>Password</label>
+                            </div>
+                            <button class="btn btn-light border-0 px-3" type="button" id="togglePassword">
+                                <span class="material-icons text-muted" id="eyeIcon" style="font-size: 20px; vertical-align: middle;">visibility</span>
+                            </button>
+                        </div>
+
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg py-3 rounded-4 shadow-sm" style="background-color: #3b71fe; border: none;">
+                                Sign In <i class="bi bi-box-arrow-in-right ms-2"></i>
+                            </button>
+                        </div>
+
+                        <div class="text-center pt-3 border-top border-light">
+                            <p class="small text-muted mb-3">New to ResuMetric AI?</p>
+                            <div class="d-flex gap-2 justify-content-center flex-wrap">
+                                <a href="{% url 'signup_unified' %}?role=CANDIDATE" class="btn btn-sm btn-outline-secondary px-3 rounded-pill">Register as Candidate</a>
+                                <a href="{% url 'signup_unified' %}?role=RECRUITER" class="btn btn-sm btn-outline-dark px-3 rounded-pill">Register as Recruiter</a>
+                            </div>
+                            <div class="mt-4">
+                                <a href="{% url 'landing' %}" class="text-decoration-none small text-muted">&larr; Back to Selection</a>
                             </div>
                         </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm"
-                                style="background-color: #3b71fe; border: none; border-radius: 10px;">Log In</button>
-                        </div>
                     </form>
-                </div>
-
-                <div class="card-footer bg-light p-4 border-top-0">
-                    <div class="text-center mb-3">
-                        <span class="text-muted small">New to ResuMetric?</span>
-                        <div class="mt-2">
-                            <a href="{% url 'signup_unified' %}?role=CANDIDATE"
-                                class="btn btn-outline-secondary btn-sm me-2 px-3">Register as Candidate</a>
-                            <a href="{% url 'signup_unified' %}?role=RECRUITER"
-                                class="btn btn-outline-dark btn-sm px-3">Register as Recruiter</a>
-                        </div>
-                    </div>
-                    <hr class="opacity-10">
-                    <div class="text-center">
-                        <a href="{% url 'landing' %}" class="text-decoration-none small text-muted">&larr; Back to
-                            Selection</a>
-                    </div>
                 </div>
             </div>
         </div>
@@ -68,25 +76,10 @@
 </div>
 
 <style>
-    /* Forces the eye icon to black and ensures visibility */
-    #eyeIcon {
-        color: #000000 !important;
-        font-size: 1.1rem;
-    }
-
-    /* Keeps icon black even when the container is active */
-    .input-group:focus-within .btn-outline-secondary i {
-        color: #000000 !important;
-    }
-
-    .form-control:focus {
-        border-color: #3b71fe;
-        box-shadow: none;
-    }
-
-    .input-group:focus-within .btn-outline-secondary {
-        border-color: #3b71fe;
-    }
+    .form-floating > .form-control { height: 60px; border-radius: 12px; border: 1px solid transparent; transition: all 0.3s ease; }
+    .form-floating > .form-control:focus { background-color: white !important; border-color: #3b71fe !important; }
+    .input-group > .btn { border-top-right-radius: 12px; border-bottom-right-radius: 12px; background-color: #f8fafc; }
+    .btn-outline-secondary, .btn-outline-dark { font-weight: 600; font-size: 0.75rem; }
 </style>
 
 <script>
@@ -97,10 +90,7 @@
     togglePassword.addEventListener('click', function (e) {
         const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
         password.setAttribute('type', type);
-
-        // Swaps between eye and eye-slash while maintaining black color
-        eyeIcon.classList.toggle('bi-eye');
-        eyeIcon.classList.toggle('bi-eye-slash');
+        eyeIcon.textContent = type === 'password' ? 'visibility' : 'visibility_off';
     });
 </script>
 {% endblock %}
