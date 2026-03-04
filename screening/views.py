@@ -166,7 +166,6 @@ def room_detail(request, slug):
         score, missing_skills_list = calculate_match_score(raw_text, room.jd_text)
         skills = extract_skills(raw_text)
         
-        # 🛡️ CREATE: This only fires if 'already_applied' is False
         ResumeSubmission.objects.create(
             room=room,
             candidate=request.user,
