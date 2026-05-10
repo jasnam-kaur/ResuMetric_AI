@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/css/intlTelInput.css">
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/intlTelInput.min.js"></script>
+
+<div class="container-fluid py-5 min-vh-100" style="background-color: #f8fafc;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-xl-6">
+            
+            <div class="card border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
+                
+                <div class="p-5 text-white text-center" style="background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);">
+                    <div class="mb-3">
+                        <span class="badge rounded-pill bg-white bg-opacity-25 px-3 py-2 small fw-bold">ONBOARDING</span>
+                    </div>
+                    <h2 class="fw-bold mb-1" style="letter-spacing: -1px;">Complete Your Profile</h2>
+                    <p class="opacity-75 small mb-0">Help us personalize your recruitment journey with AI insights.</p>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" class="p-4 p-md-5 bg-white">
+                    {% csrf_token %}
+
+                    <div class="text-center mb-5">
+                        <div class="position-relative d-inline-block">
+                            <div class="profile-pic-wrapper shadow-sm border border-4 border-white rounded-circle overflow-hidden">
+                                <img id="imgPreview" src="{{ profile.profile_pic.url }}" 
+                                     style="width: 130px; height: 130px; object-fit: cover;">
+                            </div>
+                            <label for="id_profile_pic" class="btn btn-primary position-absolute bottom-0 end-0 rounded-circle shadow-sm d-flex align-items-center justify-content-center" 
+                                   style="width: 38px; height: 38px; border: 3px solid white;">
+                                <i class="bi bi-camera-fill small"></i>
+                            </label>
+                            <input type="file" name="profile_pic" id="id_profile_pic" class="d-none" onchange="previewImage(this)">
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-12">
+                            <label class="form-label text-slate-900 fw-bold small text-uppercase">Full Professional Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                                <input type="text" name="full_name" class="form-control border-start-0 ps-0 shadow-none" 
+                                       placeholder="e.g. Jasnam Kaur" value="{{ profile.full_name }}" required>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label text-slate-900 fw-bold small text-uppercase">Mobile Number</label>
+                            <input type="tel" id="phoneInput" class="form-control shadow-none" required>
+                            <input type="hidden" name="phone" id="fullPhone">
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label text-slate-900 fw-bold small text-uppercase">LinkedIn Handle</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="bi bi-linkedin text-muted"></i></span>
+                                <input type="url" name="linkedin" class="form-control border-start-0 ps-0 shadow-none" 
+                                       placeholder="https://linkedin.com/in/..." value="{{ profile.linkedin_url }}">
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label text-slate-900 fw-bold small text-uppercase">About You</label>
+                            <textarea name="bio" class="form-control shadow-none" rows="3" 
+                                      placeholder="Write a brief professional summary...">{{ profile.bio }}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold py-3 shadow-sm transition-hover">
+                            Initialize My Career Portal <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="text-center mt-4">
+                <p class="text-muted small">Need help? <a href="#" class="text-primary text-decoration-none fw-bold">Contact Support</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-slate-900 { color: #0f172a; }
+    .btn-primary { background-color: #1E3A8A; border-color: #1E3A8A; }
+    .btn-primary:hover { background-color: #162a63; border-color: #162a63; transform: scale(1.02); }
+    
+    .form-control {
+        border: 1px solid #e2e8f0;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+    }
+    
+    .form-control:focus {
+        border-color: #3B82F6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    .input-group-text {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px 0 0 12px;
+    }
+
+    .profile-pic-wrapper {
+        transition: transform 0.3s ease;
+    }
+    
+    .profile-pic-wrapper:hover {
+        transform: rotate(3deg) scale(1.05);
+    }
+
+    /* Intl-Tel-Input Styling Sync */
+    .iti { width: 100%; }
+    .iti__flag-container { border-radius: 12px 0 0 12px; }
+    .iti__country-list { border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: none; }
+</style>
+
+<script>
+    // Image Preview Logic
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = (e) => document.getElementById('imgPreview').src = e.target.result;
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Phone Input with IP Detection Logic
+    document.addEventListener("DOMContentLoaded", function() {
+        const input = document.querySelector("#phoneInput");
+        const fullPhoneInput = document.querySelector("#fullPhone");
+
+        const iti = window.intlTelInput(input, {
+            initialCountry: "auto",
+            geoIpLookup: function(callback) {
+                fetch("https://ipapi.co/json")
+                    .then(res => res.json())
+                    .then(data => callback(data.country_code))
+                    .catch(() => callback("in"));
+            },
+            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@23.0.10/build/js/utils.js",
+            separateDialCode: true,
+        });
+
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function() {
+            fullPhoneInput.value = iti.getNumber();
+        });
+    });
+</script>
+{% endblock %}

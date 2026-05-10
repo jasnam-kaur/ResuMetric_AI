@@ -5,23 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ResuMetric AI | {% block title %}Authentication{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         :root {
             --primary-blue: #1E3A8A;
             --ai-indigo: #4F46E5;
+            --electric-blue: #3b82f6;
             --success-green: #16A34A;
-            --soft-red: #DC2626;
-
             --slate-900: #0f172a;
             --slate-600: #475569;
             --soft-bg: #f8fafc;
-            --glass: rgba(255, 255, 255, 0.9);
-            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08);
         }
 
         body {
@@ -33,12 +30,12 @@
             flex-direction: column;
         }
 
+        /* Navbar Aesthetics */
         .navbar {
-            background: var(--glass) !important;
+            background: rgba(255, 255, 255, 0.9) !important;
             backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
-            padding: 16px 0;
+            padding: 14px 0;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -54,46 +51,59 @@
         .nav-link {
             color: var(--slate-600) !important;
             font-weight: 600;
-            margin: 0 12px;
-            transition: all 0.2s ease;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
         .nav-link:hover {
-            color: var(--ai-indigo) !important;
+            color: var(--primary-blue) !important;
+            transform: translateY(-1px);
+        }
+
+        /* The Lively Highlight */
+        .active-nav {
+            color: var(--primary-blue) !important;
+        }
+
+        .active-nav::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 15%;
+            width: 70%;
+            height: 3.5px;
+            background: var(--electric-blue);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.5);
         }
 
         .btn-primary {
-            background-color: var(--primary-blue);
+            background: linear-gradient(135deg, var(--primary-blue), var(--ai-indigo));
             border: none;
             padding: 10px 24px;
             border-radius: 12px;
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.3);
-            background-color: #1a337a;
+            box-shadow: 0 10px 15px rgba(30, 58, 138, 0.2);
         }
 
-        .ai-accent {
-            background: linear-gradient(135deg, var(--primary-blue), var(--ai-indigo));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .card {
-            border: 1px solid rgba(0, 0, 0, 0.04) !important;
-            border-radius: 20px !important;
-            box-shadow: var(--card-shadow);
-            background: white;
+        .transition-lively:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .main-content {
             flex: 1;
-            padding-top: 2rem;
+            padding-top: 1.5rem;
         }
+
+        .x-small { font-size: 0.7rem; }
+        .ls-1 { letter-spacing: 0.5px; }
 
         footer {
             background: white;
@@ -108,47 +118,76 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{% url 'landing' %}">
-                <div class="bg-primary text-white rounded-3 p-2 me-2 d-flex align-items-center justify-content-center"
-                    style="width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary-blue), var(--ai-indigo)) !important;">
-                    <i class="bi bi-robot"></i>
+                <div class="rounded-3 p-2 me-2 d-flex align-items-center justify-content-center shadow-sm"
+                    style="width: 38px; height: 38px; background: linear-gradient(135deg, var(--primary-blue), var(--ai-indigo));">
+                    <i class="bi bi-robot text-white"></i>
                 </div>
                 ResuMetric <span class="fw-light">AI</span>
             </a>
 
-            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="navbar-nav ms-auto align-items-center">
+                <ul class="navbar-nav mx-auto align-items-center">
                     {% if user.is_authenticated %}
-                    <div class="d-flex align-items-center me-lg-4">
-                        <span class="small fw-bold text-slate-600">
-                            <i class="bi bi-circle-fill text-success me-1" style="font-size: 8px;"></i>
-                            {{ user.username }}
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1 px-2">
-                                {{ user.profile.get_role_display }}
-                            </span>
-                        </span>
-                    </div>
+                        
+                        {% if user.profile.role == 'CANDIDATE' %}
+                            <li class="nav-item">
+                                <a class="nav-link px-3 {% if request.resolver_match.url_name == 'home_ats_checker' %}active-nav{% endif %}" 
+                                   href="{% url 'home_ats_checker' %}">
+                                    <i class="bi bi-house-door me-1"></i> Home
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link px-3 {% if request.resolver_match.url_name == 'candidate_history' %}active-nav{% endif %}" 
+                                   href="{% url 'candidate_history' %}">
+                                    <i class="bi bi-clock-history me-1"></i> History
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link px-3" href="#" id="atsCheckerBtn">
+                                    <i class="bi bi-cpu-fill me-1"></i> ATS Checker
+                                </a>
+                            </li>
+                        {% endif %}
 
-                    {% if user.profile.role == 'RECRUITER' or user.is_staff %}
-                    <a class="nav-link" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2 me-1"></i>
-                        Dashboard</a>
+                        {% if user.profile.role == 'RECRUITER' or user.is_staff %}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active-nav{% endif %}" 
+                                   href="{% url 'dashboard' %}">
+                                    <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.url_name == 'recruiter_settings_view' %}active-nav{% endif %}" 
+                                   href="{% url 'recruiter_settings_view' %}">
+                                    <i class="bi bi-sliders me-1"></i> Settings
+                                </a>
+                            </li>
+                        {% endif %}
+
                     {% else %}
-                    <a class="nav-link" href="{% url 'home_ats_checker' %}"><i class="bi bi-graph-up-arrow me-1"></i>
-                        ATS Checker</a>
+                        <a class="nav-link" href="{% url 'home_ats_checker' %}">ATS Checker</a>
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
                     {% endif %}
+                </ul>
 
-                    <form action="{% url 'logout' %}" method="post" class="d-inline ms-lg-2">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-outline-danger px-3">Logout</button>
-                    </form>
+                <div class="navbar-nav align-items-center">
+                    {% if user.is_authenticated %}
+                        <div class="d-none d-lg-block text-end me-3">
+                            <div class="small fw-bold text-slate-900">{{ user.username }}</div>
+                            <a href="{% url 'recruiter_setup' %}" class="x-small text-primary text-uppercase fw-bold text-decoration-none ls-1">
+                                <i class="bi bi-person-circle me-1"></i> Profile
+                            </a>
+                        </div>
+                        <form action="{% url 'logout' %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold transition-lively">Logout</button>
+                        </form>
                     {% else %}
-                    <a class="nav-link" href="{% url 'home_ats_checker' %}">ATS Checker</a>
-                    <a class="nav-link" href="{% url 'login' %}">Login</a>
-                    <a class="btn btn-primary ms-lg-2" href="{% url 'register' %}">Get Started</a>
+                        <a class="btn btn-primary ms-lg-2" href="{% url 'register' %}">Get Started</a>
                     {% endif %}
                 </div>
             </div>
@@ -165,12 +204,29 @@
     <footer>
         <div class="container text-center">
             <p class="text-muted small mb-0">
-                &copy; 2026 <strong>ResuMetric AI</strong> • Powered by Advanced NLP Algorithms • IITM Project
+                &copy; 2026 <strong>ResuMetric AI</strong> • Powered by Advanced NLP • IITM Project
             </p>
         </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const atsBtn = document.getElementById('atsCheckerBtn');
+        if (atsBtn) {
+            atsBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Room-Based Analysis Required',
+                    text: "The ATS Analyzer needs a Job Description. Please enter a Hiring Room code on the Home page first.",
+                    icon: 'info',
+                    confirmButtonColor: '#1E3A8A',
+                    confirmButtonText: 'Understood',
+                    customClass: {
+                        popup: 'rounded-4 shadow-lg'
+                    }
+                });
+            });
+        }
+    </script>
 </body>
-
 </html>

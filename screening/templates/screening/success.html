@@ -1,83 +1,319 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container py-5 animate__animated animate__fadeIn">
-    <div class="row justify-content-center">
-        <div class="col-lg-7 col-xl-6">
-            <div class="card shadow-lg border-0 overflow-hidden" style="border-radius: 28px; background: #ffffff;">
-                
-                <div class="text-center pt-5 pb-5 px-4" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); position: relative; min-height: 220px;">
-                    <div class="header-icon-container shadow-lg">
-                        <i class="bi bi-check-lg text-success display-4"></i>
+<div class="success-viewport">
+    <div class="glow-sphere glow-1"></div>
+    <div class="glow-sphere glow-2"></div>
+
+    <div class="container py-5 d-flex justify-content-center">
+        <div class="glass-card-horizontal animate__animated animate__fadeInUp">
+            <div class="row g-0 h-100">
+
+                <div class="col-md-5 brand-side d-flex flex-column justify-content-center text-center p-5">
+                    <div class="floating-check shadow-lg mb-4">
+                        <i class="bi bi-check2-all"></i>
                     </div>
-                    {% if room %}
-                    <h2 class="text-white fw-bold mt-4 mb-1">Application Sent!</h2>
-                    <p class="text-white-50 mb-0 small">Successfully submitted to <strong>{{ room.name }}</strong></p>
+                    <h2 class="fw-bold text-white mb-2">Application Sent!</h2>
+                    <p class="text-white-50 small mb-0 px-3">Your resume is safely hosted in <strong>{{room.name}}</strong></p>
+
+                    <div class="mt-5 pt-4 border-top border-white border-opacity-20">
+                        <span class="badge rounded-pill px-3 py-2 text-uppercase ls-1 fw-bold shadow-sm"
+                            style="background: rgba(15, 23, 42, 0.4); color: #ffffff; border: 1px solid rgba(255,255,255,0.2);">
+                            <i class="bi bi-cpu-fill me-1 text-info"></i> RESUMETRIC AI ACTIVE
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-md-7 action-side p-5 d-flex flex-column justify-content-center bg-white">
+                    {% if submission.is_premium_unlocked %}
+                    <div class="unlocked-content">
+                        <div class="d-flex align-items-center gap-4 mb-4">
+                            <h1 class="display-3 fw-bold text-primary mb-0">{{ score }}%</h1>
+                            <div class="text-start">
+                                <p class="text-muted fw-bold x-small text-uppercase ls-2 mb-0">Match Score</p>
+                                <span
+                                    class="badge bg-success bg-opacity-10 text-success rounded-pill px-2">Verified</span>
+                            </div>
+                        </div>
+
+                        <div class="insight-box p-4 rounded-4 border bg-light shadow-sm">
+                            <h6 class="fw-bold text-slate-900 small text-uppercase mb-3 ls-1">Optimization Required</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for skill in missing_skills %}
+                                <span
+                                    class="badge bg-white text-danger border border-danger-subtle px-3 py-2 rounded-pill shadow-sm fw-bold">
+                                    + {{ skill }}
+                                </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                     {% else %}
-                    <h2 class="text-white fw-bold mt-4 mb-1">Analysis Complete!</h2>
-                    <p class="text-white-50 mb-0 small">Resume match successfully calculated</p>
-                    {% endif %}
-                </div>
+                    <div class="locked-content">
+                        <div class="d-flex align-items-center gap-3 mb-4">
+                            <div class="hex-lock shadow-sm">
+                                <i class="bi bi-shield-lock-fill"></i>
+                            </div>
+                            <div class="text-start">
+                                <h4 class="fw-bold text-slate-900 mb-0">Insights Locked</h4>
+                                <span class="badge rounded-pill bg-slate-900 px-2 py-1 x-small fw-bold">BARTER
+                                    REQUIRED</span>
+                            </div>
+                        </div>
 
-                <div class="card-body p-4 p-md-5 mt-3">
-                    <div class="text-center mb-5">
-                        <span class="text-muted small text-uppercase fw-bold ls-1">AI Match Confidence</span>
-                        <div class="d-flex align-items-center justify-content-center mt-2">
-                            <span class="display-1 fw-bold text-slate-900" style="letter-spacing: -2px;">{{ score }}</span>
-                            <span class="display-5 fw-bold text-primary ms-1">%</span>
-                        </div>
-                        
-                        <div class="progress mt-3 mx-auto" style="height: 10px; width: 85%; border-radius: 20px; background-color: #f1f5f9;">
-                            <div class="progress-bar bg-primary shadow-sm" role="progressbar" 
-                                 style="width: {{ score }}%; border-radius: 20px;"
-                                 aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                        <p class="x-small text-muted mt-3 italic">
-                            <i class="bi bi-cpu me-1"></i> NLP Logic: TF-IDF + Cosine Similarity
+                        <p class="text-muted small mb-4">
+                            To reveal your full AI report, share your unique link. Once <strong>one peer</strong>
+                            clicks, your dashboard unlocks instantly.
                         </p>
-                    </div>
 
-                    {% if missing_skills %}
-                    <div class="bg-light rounded-4 p-4 border-0">
-                        <h6 class="fw-bold mb-3 text-slate-900">Opportunities to Improve</h6>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for skill in missing_skills %}
-                            <span class="badge rounded-pill bg-white text-danger border border-danger-subtle px-3 py-2 small fw-bold shadow-sm">
-                                + {{ skill }}
-                            </span>
-                            {% endfor %}
+                        <div class="referral-gateway shadow-sm">
+                            <div class="link-display text-truncate ps-3">
+                                {{ request.get_host }}/room/{{ room.slug }}/?ref={{ submission.referral_code }}
+                            </div>
+                            <button class="copy-action-btn"
+                                onclick="copyRefLink(this, 'http://{{ request.get_host }}/room/{{ room.slug }}/?ref={{ submission.referral_code }}')">
+                                <i class="bi bi-clipboard-pulse"></i>
+                            </button>
+                        </div>
+
+                        <div class="mt-4 d-flex align-items-center gap-2">
+                            <div class="pulse-status"></div>
+                            <span class="text-muted small fw-bold text-uppercase ls-1"
+                                style="font-size: 0.6rem;">Verification Pending...</span>
+                        </div>
+                        <div class="mt-5 text-center border-top pt-4">
+                            <a href="{% url 'home_ats_checker' %}"
+                                class="btn btn-light rounded-pill px-4 fw-bold text-muted transition-hover shadow-sm border">
+                                <i class="bi bi-house-door me-2"></i> Go to Home
+                            </a>
                         </div>
                     </div>
                     {% endif %}
-
-                    <div class="mt-5">
-                        <a href="{% url 'home_ats_checker' %}" class="btn btn-outline-primary btn-lg w-100 py-3 rounded-4 fw-bold border-2 transition-hover">
-                            Return to Dashboard
-                        </a>
-                    </div>
                 </div>
+
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    .header-icon-container {
-        position: absolute;
-        bottom: -35px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #ffffff;
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
+    /* Base Scrolling Setup */
+    html,
+    body {
+        min-height: 100%;
+        background: #f8fafc;
+        margin: 0;
+    }
+
+    .success-viewport {
+        min-height: 100vh;
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 10;
+        position: relative;
+        padding: 60px 20px;
     }
-    .ls-1 { letter-spacing: 1.5px; }
-    .text-slate-900 { color: #0f172a; }
-    .x-small { font-size: 0.72rem; }
-    .btn-outline-primary:hover { background-color: #3b71fe; color: #fff; transform: translateY(-3px); }
+
+    .text-slate-900 {
+        color: #0f172a;
+    }
+
+    .bg-slate-900 {
+        background-color: #0f172a;
+        color: white;
+    }
+
+    .ls-1 {
+        letter-spacing: 1px;
+    }
+
+    .ls-2 {
+        letter-spacing: 2px;
+    }
+
+    .x-small {
+        font-size: 0.7rem;
+    }
+
+    /* Horizontal Card Design */
+    .glass-card-horizontal {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(15px);
+        border-radius: 40px;
+        box-shadow: 0 40px 100px -20px rgba(15, 23, 42, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        overflow: hidden;
+        width: 100%;
+        max-width: 900px;
+        /* Wider for horizontal layout */
+        min-height: 500px;
+    }
+
+    .brand-side {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        position: relative;
+    }
+
+    .floating-check {
+        width: 65px;
+        height: 65px;
+        background: white;
+        color: #059669;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        margin: 0 auto;
+    }
+
+    /* Lock Styling */
+    .hex-lock {
+        width: 55px;
+        height: 55px;
+        background: #fffbeb;
+        color: #d97706;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    /* Referral Gateway */
+    .referral-gateway {
+        background: #f1f5f9;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        padding: 6px;
+        transition: 0.3s;
+    }
+
+    .referral-gateway:hover {
+        border-color: #1e3a8a;
+        background: white;
+    }
+
+    .link-display {
+        flex-grow: 1;
+        font-family: 'Monaco', monospace;
+        font-size: 0.8rem;
+        color: #1e3a8a;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .copy-action-btn {
+        background: #0f172a;
+        color: white;
+        border: none;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        transition: 0.3s;
+    }
+
+    .copy-action-btn:hover {
+        background: #1e3a8a;
+        transform: scale(1.05);
+    }
+
+    /* Pulse Status Indicator */
+    .pulse-status {
+        width: 8px;
+        height: 8px;
+        background: #3b82f6;
+        border-radius: 50%;
+        animation: pulse-glow 1.8s infinite;
+    }
+
+    @keyframes pulse-glow {
+        0% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+        }
+
+        70% {
+            box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+        }
+    }
+
+    /* Background Blobs */
+    .glow-sphere {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        filter: blur(100px);
+        opacity: 0.4;
+        z-index: -1;
+    }
+
+    .glow-1 {
+        background: #dbeafe;
+        top: -150px;
+        left: -150px;
+    }
+
+    .glow-2 {
+        background: #ede9fe;
+        bottom: -150px;
+        right: -150px;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .brand-side {
+            padding: 40px 20px !important;
+        }
+
+        .glass-card-horizontal {
+            max-width: 480px;
+        }
+    }
+
+    .transition-hover {
+    transition: all 0.3s ease;
+}
+
+.transition-hover:hover {
+    background-color: #f8fafc !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    color: #1E3A8A !important;
+    border-color: #1E3A8A !important;
+}
+
+/* Ensure the center column aligns correctly */
+.mt-5.text-center {
+    width: 100%;
+}
 </style>
+
+<script>
+    function copyRefLink(btn, text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check-lg"></i>';
+            btn.style.background = '#10b981';
+
+            Swal.fire({
+                title: 'Copied!',
+                text: 'Share this link to unlock your AI report.',
+                icon: 'success',
+                confirmButtonColor: '#0f172a',
+                timer: 2000
+            });
+
+            setTimeout(() => {
+                btn.innerHTML = originalIcon;
+                btn.style.background = '#0f172a';
+            }, 2500);
+        });
+    }
+</script>
 {% endblock %}

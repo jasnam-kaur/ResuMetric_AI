@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <div class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold mb-3">AI SMART-MATCH</div>
+        <h1 class="fw-bold">Your Career Compass</h1>
+        <p class="text-muted">Based on your resume for <strong>{{ original_room.name }}</strong>, we found these better fits for you.</p>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {% if matches %}
+                {% for match in matches %}
+                <div class="card border-0 shadow-sm mb-4 rounded-4 transition-hover">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h4 class="fw-bold text-slate-900 mb-1">{{ match.room.name }}</h4>
+                                <div class="d-flex gap-2 mb-3">
+                                    {% for skill in match.matched_skills %}
+                                        <span class="badge bg-light text-dark border-0 small">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-auto text-center border-start ps-4">
+                                <div class="text-muted x-small text-uppercase fw-bold">Compatibility</div>
+                                <div class="fs-2 fw-bold text-primary">{{ match.score }}%</div>
+                            </div>
+                        </div>
+                        <hr class="my-3 opacity-10">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">
+                                <i class="bi bi-clock me-1"></i> Closes {{ match.room.expires_at|timeuntil }}
+                            </span>
+                            <a href="{% url 'room_detail' match.room.slug %}" class="btn btn-primary rounded-pill px-4 fw-bold">
+                                Apply Instantly
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-search text-muted display-1 opacity-25"></i>
+                    <h5 class="mt-3 text-muted">No high-match rooms found at the moment.</h5>
+                    <p class="small text-muted">Try updating your skills and checking back later!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

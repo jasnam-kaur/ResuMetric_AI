@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5 animate__animated animate__fadeIn">
+    <div class="row justify-content-center">
+        <div class="col-xl-10">
+            <div class="card border-0 shadow-3xl overflow-hidden" style="border-radius: 40px;">
+                <div class="row g-0">
+                    
+                    <div class="col-md-5 p-5 text-center text-white d-flex flex-column justify-content-center" 
+                         style="background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); min-height: 450px;">
+                        
+                        <form method="POST" enctype="multipart/form-data" id="profilePicForm" class="mb-4">
+                            {% csrf_token %}
+                            <div class="position-relative d-inline-block">
+                                <img src="{% if profile.profile_pic %}{{ profile.profile_pic.url }}{% else %}https://ui-avatars.com/api/?name={{ user.username }}&background=random{% endif %}" 
+                                     class="rounded-circle border border-4 border-white shadow-lg" 
+                                     style="width: 150px; height: 150px; object-fit: cover;">
+                                
+                                <label for="profile_pic" class="btn btn-primary rounded-circle position-absolute bottom-0 end-0 shadow-lg border-2 border-white" 
+                                       style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; transform: translate(10%, 10%);">
+                                    <i class="bi bi-camera-fill"></i>
+                                    <input type="file" name="profile_pic" id="profile_pic" class="d-none" onchange="this.form.submit()">
+                                </label>
+                            </div>
+                        </form>
+
+                        <h2 class="fw-800 mb-2 ls-n1">{{ profile.full_name|default:user.username }}</h2>
+                        
+                        <div class="mt-2">
+                            <span class="badge rounded-pill px-4 py-2 fw-bold ls-1 shadow-sm" 
+                                  style="background: rgba(15, 23, 42, 0.6); color: #ffffff; border: 1px solid rgba(255,255,255,0.2);">
+                                <i class="bi bi-patch-check-fill text-info me-2"></i> CERTIFIED RECRUITER
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-7 p-5 bg-white d-flex flex-column justify-content-center">
+                        <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                            <h4 class="fw-bold text-slate-900 mb-0">Professional Profile</h4>
+                            <span class="x-small fw-bold text-muted text-uppercase ls-1"><i class="bi bi-lock-fill me-1"></i> Locked Fields</span>
+                        </div>
+
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="x-small fw-bold text-muted text-uppercase ls-2 mb-2 d-block">Full Name</label>
+                                <div class="p-3 rounded-4 bg-light fw-bold text-slate-900 border">{{ profile.full_name }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="x-small fw-bold text-muted text-uppercase ls-2 mb-2 d-block">Company</label>
+                                <div class="p-3 rounded-4 bg-light fw-bold text-slate-900 border">{{ profile.company_name }}</div>
+                            </div>
+                            <div class="col-12">
+                                <label class="x-small fw-bold text-muted text-uppercase ls-2 mb-2 d-block">LinkedIn URL</label>
+                                <div class="p-3 rounded-4 bg-light fw-bold text-primary border d-flex align-items-center">
+                                    <i class="bi bi-linkedin me-2"></i> {{ profile.linkedin_url }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 p-4 rounded-4 d-flex align-items-center gap-3" style="background: #fdf2f2; border: 1px solid #fee2e2;">
+                            <i class="bi bi-exclamatation-triangle-fill text-danger fs-4"></i>
+                            <p class="text-muted small mb-0">
+                                To modify your company or legal name, please submit a <strong class="text-danger">Verification Request</strong> to the admin panel.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-800 { font-weight: 800; }
+    .ls-n1 { letter-spacing: -1px; }
+    .ls-1 { letter-spacing: 1px; }
+    .ls-2 { letter-spacing: 2px; }
+    .x-small { font-size: 0.65rem; }
+    .shadow-3xl { box-shadow: 0 40px 100px -20px rgba(15, 23, 42, 0.2); }
+</style>
+{% endblock %}
